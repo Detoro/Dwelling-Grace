@@ -29,7 +29,6 @@ export function ProductCard({ product }: { product: Product }) {
           position: "relative",
         }}
       >
-        {/* Category / Badge */}
         <div
           style={{
             position: "absolute",
@@ -51,7 +50,6 @@ export function ProductCard({ product }: { product: Product }) {
           {isPillow ? "Made to Order" : "In Stock"}
         </div>
 
-        {/* Product Image */}
         <div
           style={{
             aspectRatio: "1 / 1",
@@ -68,7 +66,6 @@ export function ProductCard({ product }: { product: Product }) {
               alt={product.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               onError={(e) => {
-                // If image 404s, replace with styled SVG placeholder
                 e.currentTarget.style.display = "none";
               }}
             />
@@ -86,7 +83,6 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Content Footer */}
         <div style={{ padding: "16px 18px 18px", borderTop: `1px solid ${COLORS.line}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <p
@@ -130,4 +126,5 @@ export function ProductCard({ product }: { product: Product }) {
     </Link>
   );
 }
+
 

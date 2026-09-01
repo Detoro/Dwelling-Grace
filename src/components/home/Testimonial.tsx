@@ -38,7 +38,6 @@ export function Testimonial() {
             border: `1px solid ${COLORS.line}`,
           }}
         >
-          {/* Star Rating */}
           <div style={{ display: "flex", justifyContent: "center", gap: 4, color: COLORS.gold, fontSize: 16, marginBottom: 20 }}>
             <span>&#9733;</span>
             <span>&#9733;</span>
@@ -47,7 +46,6 @@ export function Testimonial() {
             <span>&#9733;</span>
           </div>
 
-          {/* Quote */}
           <blockquote style={{ margin: 0 }}>
             <p
               style={{
@@ -63,7 +61,6 @@ export function Testimonial() {
             </p>
           </blockquote>
 
-          {/* Author Details */}
           <div>
             <p style={{ fontFamily: FONT_MONO, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.08em", color: COLORS.ink, margin: 0, fontWeight: 600 }}>
               {current.author} &mdash; <span style={{ color: COLORS.inkSoft, fontWeight: 400 }}>{current.location}</span>
@@ -73,7 +70,6 @@ export function Testimonial() {
             </p>
           </div>
 
-          {/* Switcher Dots */}
           <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 28 }}>
             {REVIEWS.map((_, i) => (
               <button
@@ -98,5 +94,6 @@ export function Testimonial() {
       </Reveal>
     </section>
   );
+
 }
 

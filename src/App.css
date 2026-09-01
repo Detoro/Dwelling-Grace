@@ -1,7 +1,3 @@
-/* ==========================================================================
-   Dwelling Grace Furnishings — Global Styles & Design System
-   ========================================================================== */
-
 :root {
   --color-bg-deep: #162820;
   --color-bg-deep2: #0F1D17;
@@ -55,9 +51,6 @@ main {
   flex: 1;
 }
 
-/* --------------------------------------------------------------------------
-   Interactive Buttons & Links
-   -------------------------------------------------------------------------- */
 button, a {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -142,9 +135,6 @@ button:focus-visible, a:focus-visible {
   box-shadow: 0 6px 22px rgba(199, 162, 76, 0.45);
 }
 
-/* --------------------------------------------------------------------------
-   Product Cards
-   -------------------------------------------------------------------------- */
 .product-card {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -162,9 +152,6 @@ button:focus-visible, a:focus-visible {
   transform: scale(1.04);
 }
 
-/* --------------------------------------------------------------------------
-   Animations & Drawers
-   -------------------------------------------------------------------------- */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -185,7 +172,6 @@ button:focus-visible, a:focus-visible {
   animation: fadeIn 0.25s ease-out both;
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -203,4 +189,5 @@ button:focus-visible, a:focus-visible {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(26, 24, 21, 0.3);
 }
+
 

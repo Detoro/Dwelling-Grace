@@ -1,4 +1,3 @@
-// PillowPreview.tsx
 import { Component, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -14,10 +13,8 @@ import type {
   PillowDesignState,
 } from "../../types/designer";
 
+const MODEL_URL = `${import.meta.env.BASE_URL}pillow__black/scene.gltf`;
 
-
-// Public path to the GLTF pillow asset
-const MODEL_URL = "/pillow__black/scene.gltf";
 
 export interface PillowPreviewProps {
   pillows?: PillowDesignState[];
@@ -32,7 +29,6 @@ export function PillowPreview({
   activePillowId,
   onSelectPillow,
 }: PillowPreviewProps) {
-  // Normalize pillows array from props
   const pillowList = useMemo(() => {
     if (pillows && pillows.length > 0) return pillows;
     if (design) return [design];
@@ -49,7 +45,6 @@ export function PillowPreview({
 
   const [viewMode, setViewMode] = useState<"focus" | "set">("focus");
 
-  // If there's only 1 pillow, always show focus mode
   const effectiveViewMode = pillowList.length > 1 ? viewMode : "focus";
 
   const fabric = findOption(FABRICS, activePillow?.fabricId ?? "linen-oat");
@@ -65,7 +60,6 @@ export function PillowPreview({
         overflow: "hidden",
       }}
     >
-      {/* Multi-Pillow View Toggle */}
       {pillowList.length > 1 && (
         <div
           style={{
@@ -120,7 +114,6 @@ export function PillowPreview({
         </div>
       )}
 
-      {/* 3D Canvas */}
       <ModelErrorBoundary>
         <Canvas
           camera={{
@@ -130,11 +123,8 @@ export function PillowPreview({
           dpr={[1, 2]}
         >
           <ambientLight intensity={0.65} />
-          {/* Key light for stitch specular highlights */}
           <directionalLight position={[3.5, 4.5, 3]} intensity={1.35} />
-          {/* Fill light */}
           <directionalLight position={[-3, 1.5, -2]} intensity={0.45} />
-          {/* Top rim light */}
           <directionalLight position={[0, 3, -3]} intensity={0.35} />
 
           <Suspense fallback={null}>
@@ -197,9 +187,6 @@ export function PillowPreview({
   );
 }
 
-// -----------------------------------------------------------------------------
-// Multi-Pillow Arrangement Component
-// -----------------------------------------------------------------------------
 interface PillowsArrangementProps {
   pillows: PillowDesignState[];
   activePillowId?: string;
@@ -230,7 +217,6 @@ function PillowsArrangement({
         { position: [0.92, -0.02, 0.0] as [number, number, number], rotation: [0, -0.28, -0.05] as [number, number, number], scale: 0.8 },
       ];
     }
-    // 4 or more pillows: arrange in staggered layout
     return pillows.map((_, idx) => {
       const offset = (idx - (count - 1) / 2) * 0.72;
       const zOffset = Math.sin((idx / (count - 1)) * Math.PI) * 0.28;
@@ -272,9 +258,7 @@ function PillowsArrangement({
   );
 }
 
-// -----------------------------------------------------------------------------
-// Single Pillow Item
-// -----------------------------------------------------------------------------
+
 interface PillowItemProps {
   design: PillowDesignState;
   isSelected?: boolean;
@@ -295,7 +279,6 @@ function PillowItem({
   const fabricHex = fabric.swatchHex ?? "#D8CCB4";
   const pipingHex = piping.id !== "piping-none" ? piping.swatchHex ?? COLORS.cream : null;
 
-  // Monogram customization options
   const monogram = design.monogram?.trim() ? design.monogram.trim().slice(0, 3).toUpperCase() : null;
   const monogramFont = design.monogramFont ?? "serif";
   const monogramTexture = design.monogramTexture ?? "satin";
@@ -310,7 +293,6 @@ function PillowItem({
   const { scene } = useGLTF(MODEL_URL);
   const [diffuseMap, normalMap, roughnessMap] = useTexture([weave.diffuse, weave.normal, weave.roughness]);
 
-  // Compute immutable base scale once from the unscaled scene asset
   const baseScale = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
@@ -321,15 +303,12 @@ function PillowItem({
 
   const finalScale = baseScale * scaleFactor;
 
-  // Clone scene hierarchy and orient upright with front face facing forward (+Z)
   const cloned = useMemo(() => {
     const c = scene.clone(true);
-    // Rotate model 90 degrees around X axis so square face stands upright facing +Z
     c.rotation.set(Math.PI / 2, 0, 0);
     return c;
   }, [scene]);
 
-  // Extract all meshes in the cloned object
   const meshes = useMemo(() => {
     const found: THREE.Mesh[] = [];
     cloned.traverse((child) => {
@@ -343,7 +322,6 @@ function PillowItem({
     return found;
   }, [cloned]);
 
-  // Assign individual cloned materials
   useEffect(() => {
     meshes.forEach((mesh) => {
       const source = mesh.material as THREE.MeshStandardMaterial;
@@ -353,7 +331,6 @@ function PillowItem({
     });
   }, [meshes]);
 
-  // Apply fabric color tinting and repeated PolyHaven weave textures
   useEffect(() => {
     const clonedTextures: THREE.Texture[] = [];
 
@@ -387,7 +364,6 @@ function PillowItem({
     };
   }, [meshes, diffuseMap, normalMap, roughnessMap, weave.repeat, fabricHex]);
 
-  // Piping outline
   useEffect(() => {
     const added: THREE.LineSegments[] = [];
     if (pipingHex) {
@@ -411,15 +387,9 @@ function PillowItem({
     };
   }, [meshes, pipingHex]);
 
-  // ---------------------------------------------------------------------------
-  // Front-Face Monogram Decal Placement
-  // Directly anchors on the front face apex of the cushion geometry
-  // ---------------------------------------------------------------------------
   const monogramPlacement = useMemo(() => {
     if (!monogram || meshes.length === 0) return null;
 
-    // In local model coordinates: front cushion face apex is at Z = 46.32
-    // Placing at Z = 46.8 ensures it sits right on the front face without clipping
     return {
       position: [0.0, 0.0, 46.8] as [number, number, number],
       rotation: [0, 0, 0] as [number, number, number],
@@ -448,25 +418,15 @@ function PillowItem({
   );
 }
 
-// -----------------------------------------------------------------------------
-// High-Contrast Luxury Thread Color Palette
-// -----------------------------------------------------------------------------
 function threadColorFor(fabricHex: string): string {
   const upper = fabricHex.toUpperCase();
-  // Midnight Velvet -> Brilliant Champagne Gold thread
   if (upper.includes("182B49") || upper.includes("1A365D") || upper.includes("0C1826")) return "#F0DFB0";
-  // Velvet Wine -> Rich Champagne Gold thread
   if (upper.includes("5C1F2E") || upper.includes("4E1D29")) return "#E5C158";
-  // Velvet Moss -> Warm Satin Gold thread
   if (upper.includes("3E4A34")) return "#DFBA63";
-  // Silk Gold -> Deep Midnight Oxford Navy thread
   if (upper.includes("C7A24C")) return "#0C1826";
-  // Clay Linen -> Pure Ivory Cream thread
   if (upper.includes("B97D5D")) return "#FBF9F4";
-  // Oat Linen -> Deep Espresso thread
   if (upper.includes("D8CCB4")) return "#141E28";
 
-  // Luminance calculation fallback
   const hex = fabricHex.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16) / 255;
   const g = parseInt(hex.substring(2, 4), 16) / 255;
@@ -475,10 +435,6 @@ function threadColorFor(fabricHex: string): string {
   return luminance > 0.45 ? "#121922" : "#F7F5EE";
 }
 
-// -----------------------------------------------------------------------------
-// 3D Physical Embroidery Decal Component
-// Generates raised physical thread normal/bump textures reacting realistically to light
-// -----------------------------------------------------------------------------
 interface MonogramDecalProps {
   text: string;
   font: MonogramFont;
@@ -502,7 +458,6 @@ function MonogramDecal({
 }: MonogramDecalProps) {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Generate procedural embroidery diffuse & bump map textures
   const { diffTex, bumpTex } = useMemo(() => {
     const width = 1024;
     const height = 512;
@@ -518,12 +473,10 @@ function MonogramDecal({
     const bumpCtx = bumpCanvas.getContext("2d");
 
     if (diffCtx && bumpCtx) {
-      // 1. Clear backgrounds
       diffCtx.clearRect(0, 0, width, height);
       bumpCtx.fillStyle = "#000000";
       bumpCtx.fillRect(0, 0, width, height);
 
-      // Select Typography font
       let fontStyle = `bold 165px "Playfair Display", Georgia, "Times New Roman", serif`;
       let textOffsetY = 10;
       if (font === "script") {
@@ -549,7 +502,6 @@ function MonogramDecal({
       const cx = width / 2;
       const cy = height / 2 + textOffsetY;
 
-      // Calculate letter spacing offset
       const spacingOffset = spacing === "tight" ? -14 : spacing === "wide" ? 30 : 6;
 
       const drawText = (ctx: CanvasRenderingContext2D, fill: string) => {
@@ -557,8 +509,6 @@ function MonogramDecal({
         if (cleanText.length <= 1) {
           ctx.fillText(cleanText, cx, cy);
         } else {
-
-          // Render characters with precise horizontal spacing
           const chars = cleanText.split("");
           const widths = chars.map((c) => ctx.measureText(c).width);
           const totalWidth = widths.reduce((acc, w) => acc + w, 0) + (chars.length - 1) * spacingOffset;
@@ -570,15 +520,12 @@ function MonogramDecal({
         }
       };
 
-      // 2. Render base text geometry in bump canvas (raised baseline height)
       drawText(bumpCtx, "#D0D0D0");
 
-      // 3. Procedural Thread Texture finish on Bump Map
       bumpCtx.save();
       bumpCtx.globalCompositeOperation = "source-atop";
 
       if (texture === "silk") {
-        // Ultra-fine 30-degree micro-filaments
         bumpCtx.strokeStyle = "#FFFFFF";
         bumpCtx.lineWidth = 2.4;
         const step = 4.5;
@@ -589,7 +536,6 @@ function MonogramDecal({
           bumpCtx.stroke();
         }
       } else if (texture === "cotton") {
-        // Natural cross-hatch organic matte weave
         bumpCtx.strokeStyle = "#FFFFFF";
         bumpCtx.lineWidth = 3.2;
         const step = 7;
@@ -606,7 +552,6 @@ function MonogramDecal({
           bumpCtx.stroke();
         }
       } else if (texture === "metallic") {
-        // Heavy bullion coiled wire grooves
         bumpCtx.strokeStyle = "#FFFFFF";
         bumpCtx.lineWidth = 4.5;
         const step = 6;
@@ -617,7 +562,6 @@ function MonogramDecal({
           bumpCtx.stroke();
         }
       } else {
-        // Classic Satin Stitch (45-degree dense thread grooves)
         bumpCtx.strokeStyle = "#FFFFFF";
         bumpCtx.lineWidth = 4;
         const step = 7;
@@ -630,15 +574,12 @@ function MonogramDecal({
       }
       bumpCtx.restore();
 
-      // 4. Render Thread Base on Diffuse Canvas
       drawText(diffCtx, threadColor);
 
-      // 5. Texture Sheen / Highlight Ridges on Diffuse Canvas
       diffCtx.save();
       diffCtx.globalCompositeOperation = "source-atop";
 
       if (texture === "silk") {
-        // High-specular silk shimmer
         diffCtx.strokeStyle = "rgba(255, 255, 255, 0.42)";
         diffCtx.lineWidth = 1.8;
         const step = 4.5;
@@ -649,7 +590,6 @@ function MonogramDecal({
           diffCtx.stroke();
         }
       } else if (texture === "cotton") {
-        // Soft matte organic variations
         diffCtx.strokeStyle = "rgba(255, 255, 255, 0.14)";
         diffCtx.lineWidth = 2.0;
         const step = 7;
@@ -667,7 +607,6 @@ function MonogramDecal({
           diffCtx.stroke();
         }
       } else if (texture === "metallic") {
-        // Brilliant metallic bullion gold/silver glint
         diffCtx.strokeStyle = "rgba(255, 248, 210, 0.65)";
         diffCtx.lineWidth = 2.4;
         const step = 6;
@@ -686,7 +625,6 @@ function MonogramDecal({
           diffCtx.stroke();
         }
       } else {
-        // Satin Stitch sheen
         diffCtx.strokeStyle = "rgba(255, 255, 255, 0.25)";
         diffCtx.lineWidth = 2.0;
         const step = 7;
@@ -719,7 +657,6 @@ function MonogramDecal({
     return { diffTex: dTex, bumpTex: bTex };
   }, [text, font, texture, threadColor, spacing]);
 
-  // Clean up textures on unmount or change
   useEffect(() => {
     return () => {
       diffTex.dispose();
@@ -727,7 +664,6 @@ function MonogramDecal({
     };
   }, [diffTex, bumpTex]);
 
-  // Physical thread material properties customized per texture type
   const materialProps = useMemo(() => {
     if (texture === "silk") {
       return {
@@ -750,7 +686,6 @@ function MonogramDecal({
         metalness: 0.78,
       };
     }
-    // Default Satin
     return {
       bumpScale: 0.06,
       roughness: 0.36,
@@ -779,10 +714,6 @@ function MonogramDecal({
   );
 }
 
-
-// -----------------------------------------------------------------------------
-// Preload Assets
-// -----------------------------------------------------------------------------
 useGLTF.preload(MODEL_URL);
 Object.values(FABRIC_WEAVES).forEach((weave) => {
   useTexture.preload(weave.diffuse);
@@ -790,9 +721,6 @@ Object.values(FABRIC_WEAVES).forEach((weave) => {
   useTexture.preload(weave.roughness);
 });
 
-// -----------------------------------------------------------------------------
-// Error Boundary
-// -----------------------------------------------------------------------------
 class ModelErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
 

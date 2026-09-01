@@ -36,7 +36,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, width: "100%" }}>
-      {/* Input & Clear / Sample Row */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <input
           type="text"
@@ -108,7 +107,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
         )}
       </div>
 
-      {/* Expanded Customization Controls (when text is entered) */}
       {value ? (
         <div
           style={{
@@ -122,7 +120,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
             boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
           }}
         >
-          {/* 1. Lettering Font Style */}
           <div>
             <span
               style={{
@@ -184,7 +181,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
             </div>
           </div>
 
-          {/* 2. Thread Texture / Material */}
           <div>
             <span
               style={{
@@ -250,7 +246,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
             </div>
           </div>
 
-          {/* 3. Thread Color */}
           <div>
             <span
               style={{
@@ -314,9 +309,7 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
             </div>
           </div>
 
-          {/* 4. Letter Spacing & Scale Grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {/* Spacing */}
             <div>
               <span
                 style={{
@@ -360,7 +353,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
               </div>
             </div>
 
-            {/* Size */}
             <div>
               <span
                 style={{
@@ -413,5 +405,6 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
     </div>
   );
 }
+
 
 

@@ -27,10 +27,8 @@ export function CheckoutSuccessPage() {
       })
       .catch(() => setError("We couldn't load your order details, but your payment did go through."))
       .finally(() => setLoading(false));
-    // clear() intentionally omitted from deps — it's stable per cart, and we
-    // only want this to run once for this session id
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
+
 
   return (
     <div style={{ maxWidth: 640, margin: "0 auto", padding: "80px 24px 120px", textAlign: "center" }}>

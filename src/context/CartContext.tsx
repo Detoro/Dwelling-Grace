@@ -14,7 +14,6 @@ type CartAction =
 function reducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_LINE": {
-      // merge if an identical line (same product + same selections) already exists
       const key = lineKey(action.line);
       const existing = state.lines.find((l) => lineKey(l) === key);
       if (existing) {
@@ -55,7 +54,7 @@ function lineKey(line: CartLine): string {
 interface CartContextValue {
   lines: CartLine[];
   itemCount: number;
-  subtotal: number; // cents
+  subtotal: number;
   addLine: (line: Omit<CartLine, "lineId">) => void;
   removeLine: (lineId: string) => void;
   setQuantity: (lineId: string, quantity: number) => void;
@@ -72,27 +71,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
-  // hydrate from localStorage once on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) dispatch({ type: "REPLACE", state: JSON.parse(raw) });
     } catch {
-      // corrupt/blocked storage — start empty, don't crash the app
     } finally {
       setHydrated(true);
     }
   }, []);
 
-  // persist on every change, after hydration
   useEffect(() => {
     if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // storage full or unavailable — cart still works in-memory for this session
     }
   }, [state, hydrated]);
+
 
   const value = useMemo<CartContextValue>(() => {
     const itemCount = state.lines.reduce((sum, l) => sum + l.quantity, 0);

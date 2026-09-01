@@ -8,10 +8,10 @@ export function Newsletter() {
   function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (!email) return;
-    // TODO: wire to POST /api/newsletter once that endpoint exists
     setStatus("sent");
     setEmail("");
   }
+
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 24 }}>

@@ -14,7 +14,6 @@ export function Hero() {
       }}
     >
       <div style={{ maxWidth: 840, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 2 }}>
-        {/* Atelier Badge */}
         <div
           style={{
             display: "inline-flex",
@@ -36,7 +35,6 @@ export function Hero() {
           Handcrafted Bespoke Atelier
         </div>
 
-        {/* Hero Title */}
         <h1
           style={{
             fontFamily: FONT_DISPLAY,
@@ -51,7 +49,6 @@ export function Hero() {
           Pillows tailored to the exact fabric, trim, and monogram you desire.
         </h1>
 
-        {/* Subtitle */}
         <p
           style={{
             fontSize: 17,
@@ -66,7 +63,6 @@ export function Hero() {
           Configure Belgian linens, plush velvets, contrast piping, and raised 3D thread embroidery in our real-time studio. Each piece is cut and stitched after you order.
         </p>
 
-        {/* CTAs */}
         <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
           <Link to="/designer" className="btn-gold" style={{ padding: "14px 30px", fontSize: 13 }}>
             Open 3D Design Studio &rarr;
@@ -92,7 +88,6 @@ export function Hero() {
           </Link>
         </div>
 
-        {/* Highlights Bar */}
         <div
           style={{
             display: "flex",
@@ -118,4 +113,5 @@ export function Hero() {
     </section>
   );
 }
+
 

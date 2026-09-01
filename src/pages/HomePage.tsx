@@ -31,7 +31,6 @@ export function HomePage() {
     <>
       <Hero />
 
-      {/* Featured Collection Section */}
       <section style={{ padding: "90px 24px", maxWidth: 1240, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
           <SectionHead
@@ -70,8 +69,8 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 3D Studio Atelier Feature Banner */}
       <section style={{ background: COLORS.bgDeep, color: COLORS.cream, padding: "88px 24px", position: "relative", overflow: "hidden" }}>
+
         <div
           style={{
             maxWidth: 1200,

@@ -1,30 +1,22 @@
 export const COLORS = {
-  // deep grounds — hero, footer, dark designer canvas (heritage midnight oxford navy)
   bgDeep: "#0C1826",
   bgDeep2: "#070F18",
-
-  // everyday page background & warm grounds
   cream: "#F7F5EE",
   creamDim: "#EFECE2",
-
-  // typography
   ink: "#121922",
   inkSoft: "#4E5A6A",
-
-  // luxury accents & brand blue
-  wine: "#1A365D",       // Regal Sapphire Navy
-  wineDeep: "#0F2440",   // Midnight Navy Hover
-  gold: "#C7A24C",       // Antique Satin Brass
-  goldLight: "#F0DFB0",  // Champagne Glow
+  wine: "#1A365D",
+  wineDeep: "#0F2440",
+  gold: "#C7A24C",
+  goldLight: "#F0DFB0",
   goldMuted: "#D8C288",
-
-  // utility & borders
   line: "rgba(18, 25, 34, 0.09)",
   lineOnDark: "rgba(247, 245, 238, 0.16)",
   white: "#FFFFFF",
   error: "#A83232",
   success: "#1E58A4",
 } as const;
+
 
 export const FONT_DISPLAY = "'Fraunces', 'Iowan Old Style', Georgia, serif";
 export const FONT_BODY = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";

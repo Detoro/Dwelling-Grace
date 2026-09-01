@@ -9,7 +9,7 @@ function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-const FREE_SHIPPING_THRESHOLD_CENTS = 15000; // $150.00
+const FREE_SHIPPING_THRESHOLD_CENTS = 15000;
 
 export function CartDrawer() {
   const { lines, subtotal, isDrawerOpen, closeDrawer, setQuantity, removeLine } = useCart();
@@ -65,7 +65,6 @@ export function CartDrawer() {
           animation: "drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both",
         }}
       >
-        {/* Drawer Header */}
         <div
           style={{
             display: "flex",
@@ -99,7 +98,6 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {/* Free Shipping Progress Indicator */}
         <div style={{ background: COLORS.creamDim, padding: "14px 24px", borderBottom: `1px solid ${COLORS.line}` }}>
           <p style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: COLORS.ink, margin: "0 0 8px" }}>
             {amountRemainingForFreeShipping === 0 ? (
@@ -121,7 +119,6 @@ export function CartDrawer() {
           </div>
         </div>
 
-        {/* Lines Scrollable Body */}
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>
           {lines.length === 0 ? (
             <div style={{ textAlign: "center", padding: "64px 16px" }}>
@@ -213,9 +210,9 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Footer Checkout Summary */}
         {lines.length > 0 && (
           <div style={{ padding: "20px 24px 28px", borderTop: `1px solid ${COLORS.line}`, background: COLORS.white }}>
+
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 15, marginBottom: 8 }}>
               <span>Subtotal</span>
               <span style={{ fontWeight: 600, color: COLORS.ink }}>{formatPrice(subtotal)}</span>

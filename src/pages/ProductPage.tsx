@@ -10,6 +10,7 @@ import { QuantityStepper } from "../components/ui/QuantityStepper";
 import { Toast } from "../components/ui/Toast";
 import { useCart } from "../context/CartContext";
 import { StitchDivider } from "../components/ui/StitchDivider";
+import heroImage from "../assets/hero.png";
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -33,8 +34,6 @@ export function ProductPage() {
         if (g.options[0]) defaults[g.id] = g.options[0].id;
       });
       setSelections(defaults);
-      setActiveImage(0);
-      setQuantity(1);
       setLoading(false);
     });
   }, [slug]);
@@ -43,16 +42,17 @@ export function ProductPage() {
     if (!product) return 0;
     let price = product.basePrice;
     product.variantGroups.forEach((g) => {
-      const chosen = g.options.find((o) => o.id === selections[g.id]);
-      if (chosen) price += chosen.priceDelta;
+      const selectedId = selections[g.id];
+      const opt = g.options.find((o) => o.id === selectedId);
+      if (opt) price += opt.priceDelta;
     });
     return price;
   }, [product, selections]);
 
   if (loading || !product) {
     return (
-      <div style={{ padding: "100px 24px", textAlign: "center", fontFamily: FONT_MONO, color: COLORS.inkSoft }}>
-        Loading piece…
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "120px 24px", textAlign: "center" }}>
+        <p style={{ fontFamily: FONT_MONO, fontSize: 13, color: COLORS.inkSoft }}>Loading piece...</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export function ProductPage() {
       productId: product.id,
       productSlug: product.slug,
       name: product.name,
-      image: product.images[0] ?? "/placeholder-pillow.svg",
+      image: product.images[0] ?? heroImage,
       quantity,
       unitPrice,
       selections: lineSelections,
@@ -77,7 +77,6 @@ export function ProductPage() {
 
   return (
     <div style={{ maxWidth: 1240, margin: "0 auto", padding: "48px 24px 120px" }}>
-      {/* Breadcrumbs */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 11, color: COLORS.inkSoft, marginBottom: 28 }}>
         <Link to="/" style={{ color: COLORS.inkSoft, textDecoration: "none" }}>Home</Link>
         <span>/</span>
@@ -87,7 +86,6 @@ export function ProductPage() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 60 }} className="product-detail-grid">
-        {/* Gallery */}
         <div>
           <div
             style={{
@@ -100,7 +98,7 @@ export function ProductPage() {
             }}
           >
             <img
-              src={product.images[activeImage] ?? "/placeholder-pillow.svg"}
+              src={product.images[activeImage] ?? heroImage}
               alt={product.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               onError={(e) => {
@@ -134,7 +132,6 @@ export function ProductPage() {
             </div>
           )}
 
-          {/* 3D Studio Callout */}
           <div
             style={{
               marginTop: 24,
@@ -162,7 +159,6 @@ export function ProductPage() {
           </div>
         </div>
 
-        {/* Details Column */}
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 999, background: "rgba(199, 162, 76, 0.12)", color: COLORS.gold, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
             Made to Order
@@ -187,7 +183,6 @@ export function ProductPage() {
             />
           ))}
 
-          {/* Action Row */}
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 16 }}>
             <QuantityStepper quantity={quantity} onChange={setQuantity} />
             <button
@@ -204,7 +199,6 @@ export function ProductPage() {
             </button>
           </div>
 
-          {/* Atelier Guarantees */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 24, padding: "16px", background: COLORS.white, borderRadius: RADIUS.md, border: `1px solid ${COLORS.line}`, fontFamily: FONT_MONO, fontSize: 11, color: COLORS.inkSoft }}>
             <div>&bull; Hand-stitched in small batches</div>
             <div>&bull; Ships in 2–3 weeks</div>
@@ -212,7 +206,6 @@ export function ProductPage() {
             <div>&bull; Free shipping over $150</div>
           </div>
 
-          {/* Accordion Tabs */}
           <div style={{ marginTop: 36 }}>
             <StitchDivider />
             <Accordion title="Care & Maintenance" isOpen={openAccordion === "care"} onToggle={() => setOpenAccordion(openAccordion === "care" ? null : "care")}>
@@ -227,7 +220,6 @@ export function ProductPage() {
         </div>
       </div>
 
-      {/* Sticky add-to-cart bar, mobile only */}
       <div className="sticky-add-bar">
         <div>
           <p style={{ fontFamily: FONT_DISPLAY, fontSize: 15, margin: 0 }}>{product.name}</p>

@@ -22,6 +22,7 @@ import {
   createNewPillowDesign,
   type PillowDesignState,
 } from "../types/designer";
+import heroImage from "../assets/hero.png";
 
 type DesignerTab = "pillow";
 
@@ -33,22 +34,18 @@ export function DesignerPage() {
 
   const { addLine } = useCart();
 
-  // Find the currently selected pillow
   const activePillow = useMemo(() => {
     return pillows.find((p) => p.id === activePillowId) ?? pillows[0];
   }, [pillows, activePillowId]);
 
-  // Update active pillow properties
   function updateActivePillow(next: PillowDesignState) {
     setPillows((prev) =>
       prev.map((p) => (p.id === activePillow.id ? { ...next, id: p.id, name: p.name } : p))
     );
   }
 
-  // Multi-Pillow Actions
   function handleAddPillow() {
     const nextIndex = pillows.length + 1;
-    // Suggest the next fabric option in cycle
     const nextFabric = FABRICS[(nextIndex - 1) % FABRICS.length]?.id ?? "linen-oat";
     const newPillow = createNewPillowDesign(nextIndex, nextFabric);
     setPillows((prev) => [...prev, newPillow]);
@@ -81,7 +78,6 @@ export function DesignerPage() {
     updateActivePillow({ ...activePillow, quantity: q });
   }
 
-  // Pricing calculations
   const activeUnitPrice = useMemo(() => computePillowPrice(activePillow), [activePillow]);
 
   const collectionTotal = useMemo(() => {
@@ -95,7 +91,6 @@ export function DesignerPage() {
     return pillows.reduce((sum, p) => sum + p.quantity, 0);
   }, [pillows]);
 
-  // Add individual active pillow to cart
   function handleAddSingleToBag() {
     const fabric = findOption(FABRICS, activePillow.fabricId);
     const size = findOption(SIZES, activePillow.sizeId);
@@ -123,7 +118,7 @@ export function DesignerPage() {
       productId: "custom-pillow",
       productSlug: "designer/pillow",
       name: `Custom Pillow (${activePillow.name ?? fabric.label})`,
-      image: "/placeholder-pillow.svg",
+      image: heroImage,
       quantity: activePillow.quantity,
       unitPrice: activeUnitPrice,
       selections,
@@ -143,7 +138,6 @@ export function DesignerPage() {
     setToastMessage(`Added ${activePillow.name ?? "custom pillow"} to your bag`);
   }
 
-  // Batch add entire collection of pillows to bag
   function handleAddAllToBag() {
     pillows.forEach((p, idx) => {
       const fabric = findOption(FABRICS, p.fabricId);
@@ -173,7 +167,7 @@ export function DesignerPage() {
         productId: "custom-pillow",
         productSlug: "designer/pillow",
         name: `Custom Pillow (${p.name ?? `Pillow ${idx + 1}`} - ${fabric.label})`,
-        image: "/placeholder-pillow.svg",
+        image: heroImage,
         quantity: p.quantity,
         unitPrice: unitPrice,
         selections,
@@ -195,10 +189,10 @@ export function DesignerPage() {
   }
 
 
+
   return (
     <div style={{ background: COLORS.bgDeep, minHeight: "75vh", padding: "48px 24px 100px" }}>
       <div style={{ maxWidth: 1240, margin: "0 auto" }}>
-        {/* Breadcrumbs on Dark */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 11, color: "rgba(247, 245, 238, 0.6)", marginBottom: 20 }}>
           <span>Home</span>
           <span>/</span>
@@ -212,13 +206,11 @@ export function DesignerPage() {
           onDark
         />
 
-        {/* Tab Selection */}
         <div style={{ display: "flex", gap: 10, margin: "32px 0 32px" }}>
           <TabButton label="3D Pillow Studio" active={tab === "pillow"} onClick={() => setTab("pillow")} />
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 40 }} className="designer-grid">
-          {/* 3D Preview Column */}
           <div style={{ position: "sticky", top: 100, alignSelf: "start" }} className="designer-preview">
             <PillowPreview
               pillows={pillows}
@@ -227,7 +219,6 @@ export function DesignerPage() {
             />
           </div>
 
-          {/* Designer Configuration Column */}
           <div
             style={{
               background: COLORS.cream,
@@ -237,7 +228,6 @@ export function DesignerPage() {
               border: `1px solid ${COLORS.line}`,
             }}
           >
-            {/* Multi-Pillow Set Manager Bar */}
             <div
               style={{
                 marginBottom: 24,
@@ -312,7 +302,6 @@ export function DesignerPage() {
                 </div>
               </div>
 
-              {/* Pill Switchers for each pillow */}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {pillows.map((pillow, idx) => {
                   const isSelected = pillow.id === activePillow.id;
@@ -336,7 +325,6 @@ export function DesignerPage() {
                         if (pillow.id) setActivePillowId(pillow.id);
                       }}
                     >
-                      {/* Swatch color dot */}
                       <span
                         style={{
                           width: 12,
@@ -387,10 +375,8 @@ export function DesignerPage() {
               </div>
             </div>
 
-            {/* Customization Options for Active Pillow */}
             <PillowDesignerPanel design={activePillow} onChange={updateActivePillow} />
 
-            {/* Price & Quantity Summary */}
             <div
               style={{
                 display: "flex",
@@ -415,7 +401,6 @@ export function DesignerPage() {
               <QuantityStepper quantity={activePillow.quantity} onChange={setQuantity} />
             </div>
 
-            {/* Bag Actions */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {pillows.length > 1 ? (
                 <>

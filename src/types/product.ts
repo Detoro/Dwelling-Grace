@@ -3,14 +3,13 @@ export type ProductCategory = "pillow" | "accessory";
 export interface ProductVariantOption {
   id: string;
   label: string;
-  /** cents, added on top of the base price */
   priceDelta: number;
   swatchHex?: string;
   swatchImage?: string;
 }
 
 export interface ProductVariantGroup {
-  id: string; // e.g. "fabric", "size"
+  id: string;
   label: string;
   required: boolean;
   options: ProductVariantOption[];
@@ -21,7 +20,6 @@ export interface Product {
   slug: string;
   name: string;
   category: ProductCategory;
-  /** cents */
   basePrice: number;
   images: string[];
   shortDescription: string;
@@ -31,3 +29,4 @@ export interface Product {
   shippingNotes: string;
   featured?: boolean;
 }
+

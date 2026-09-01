@@ -15,7 +15,6 @@ export function Header() {
 
   return (
     <>
-      {/* Top Announcement Bar */}
       <div
         style={{
           background: COLORS.bgDeep2,
@@ -53,7 +52,6 @@ export function Header() {
             justifyContent: "space-between",
           }}
         >
-          {/* Brand Logo */}
           <Link
             to="/"
             style={{
@@ -94,7 +92,6 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav
             aria-label="Primary"
             style={{ display: "flex", gap: 32, alignItems: "center" }}
@@ -138,7 +135,6 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Actions (Bag + Mobile Toggle) */}
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <button
               type="button"
@@ -202,8 +198,8 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
         {mobileOpen && (
+
           <nav
             aria-label="Primary mobile"
             style={{

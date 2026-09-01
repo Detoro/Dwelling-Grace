@@ -1,7 +1,7 @@
 export interface DesignerOption {
   id: string;
   label: string;
-  priceDelta: number; // cents
+  priceDelta: number;
   swatchHex?: string;
   weave?: "linen" | "velvet" | "silk" | "floral";
 }
@@ -21,11 +21,12 @@ export interface PillowDesignState {
   monogram?: string;
   monogramFont?: MonogramFont;
   monogramTexture?: MonogramTexture;
-  monogramColor?: string; // hex or 'auto'
+  monogramColor?: string;
   monogramSpacing?: MonogramSpacing;
   monogramSize?: MonogramSize;
   quantity: number;
 }
+
 
 export const DEFAULT_PILLOW_DESIGN: PillowDesignState = {
   id: "pillow-1",

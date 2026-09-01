@@ -4,7 +4,6 @@ import { api } from "./client";
 export interface CheckoutLinePayload {
   productId: string;
   quantity: number;
-  /** raw option IDs only — the server looks up real prices, never trusts unitPrice */
   selections: Record<string, string>;
   designerConfig?: Record<string, string>;
 }
@@ -31,10 +30,11 @@ export async function createCheckoutSession(lines: CartLine[]): Promise<Checkout
 export interface OrderReceipt {
   orderId: string;
   email: string;
-  total: number; // cents
+  total: number;
   lines: { name: string; quantity: number; unitPrice: number }[];
 }
 
 export async function fetchOrderBySessionId(sessionId: string): Promise<OrderReceipt> {
   return api.get<OrderReceipt>(`/checkout/session/${sessionId}`);
 }
+

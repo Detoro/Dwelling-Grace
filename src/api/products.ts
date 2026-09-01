@@ -1,5 +1,6 @@
 import type { Product, ProductCategory } from "../types/product";
 import { api } from "./client";
+import heroImage from "../assets/hero.png";
 
 const FALLBACK_PRODUCTS: Product[] = [
   {
@@ -8,7 +9,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     name: "Hearth Pillow",
     category: "pillow",
     basePrice: 1899,
-    images: ["/pillow__black/textures/Material_baseColor.png"],
+    images: [`${import.meta.env.BASE_URL}pillow__black/textures/Material_baseColor.png`],
     shortDescription: "Our signature made-to-order square pillow in Belgian linen and velvet.",
     description:
       "A simple, well-proportioned square pillow built the same way we build every piece — cut and stitched to order, in small batches, from fabric we keep on hand in the workroom.",
@@ -46,7 +47,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     name: "Orchard Lumbar Pillow",
     category: "pillow",
     basePrice: 1899,
-    images: ["/assets/hero.png"],
+    images: [heroImage],
     shortDescription: "A long lumbar shape for a reading chair or deep window seat.",
     description:
       "Built on the same frame as the Hearth Pillow but cut long and narrow — made for the small of your back on a deep chair, or laid flat along a windowsill.",
@@ -81,7 +82,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     name: "Everyday Pillowcase Set",
     category: "pillow",
     basePrice: 1899,
-    images: ["/assets/hero.png"],
+    images: [heroImage],
     shortDescription: "A set of two covers, tailored in matching natural flax linen.",
     description:
       "The same linen and velvet as the rest of the collection, cut into a simple envelope-back case. Sold as a set of two.",
@@ -116,7 +117,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     name: "Feather-Down Insert",
     category: "accessory",
     basePrice: 2600,
-    images: ["/assets/hero.png"],
+    images: [heroImage],
     shortDescription: "Generously filled 95/5 feather-down insert with double-stitched ticking.",
     description: "A generously filled 95% feather, 5% down insert so your cover keeps its lofty shape.",
     variantGroups: [
@@ -141,7 +142,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     name: "Custom Monogramming",
     category: "accessory",
     basePrice: 1399,
-    images: ["/assets/hero.png"],
+    images: [heroImage],
     shortDescription: "Hand-finished raised embroidery initials, up to three letters.",
     description: "Add up to three hand-embroidered initials in raised satin stitch to any pillow in your order.",
     variantGroups: [],
@@ -157,7 +158,6 @@ export async function fetchProducts(category?: ProductCategory): Promise<Product
     const res = await api.get<Product[]>(`/products${qs}`);
     if (res && Array.isArray(res) && res.length > 0) return res;
   } catch {
-    // Graceful fallback to static catalog
   }
   if (category) {
     return FALLBACK_PRODUCTS.filter((p) => p.category === category);
@@ -170,7 +170,6 @@ export async function fetchProductBySlug(slug: string): Promise<Product> {
     const res = await api.get<Product>(`/products/${slug}`);
     if (res) return res;
   } catch {
-    // Graceful fallback
   }
   const fallback = FALLBACK_PRODUCTS.find((p) => p.slug === slug);
   if (fallback) return fallback;
@@ -182,8 +181,8 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
     const res = await api.get<Product[]>("/products?featured=true");
     if (res && Array.isArray(res) && res.length > 0) return res;
   } catch {
-    // Graceful fallback
   }
   return FALLBACK_PRODUCTS.filter((p) => p.featured);
 }
+
 

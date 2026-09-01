@@ -70,7 +70,7 @@ export function findOption(list: DesignerOption[], id: string): DesignerOption {
   return list.find((o) => o.id === id) ?? list[0];
 }
 
-const PILLOW_BASE_PRICE = 1899; // cents
+const PILLOW_BASE_PRICE = 1899;
 
 export function computePillowPrice(state: {
   fabricId: string;

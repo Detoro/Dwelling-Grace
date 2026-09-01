@@ -1,26 +1,10 @@
-/**
- * Real, photographed fabric weaves from Poly Haven (https://polyhaven.com) —
- * CC0, so no attribution is legally required.
- *
- * Each entry is a *weave family*, not a color — the designer's fabric
- * swatches (see designerOptions.ts) point at one of these and tint it with
- * `material.color`, the same way real fabric configurators (Article, West
- * Elm) apply a dye color on top of a neutral, photographed weave instead of
- * commissioning a separate photo shoot per colorway.
- *
- * To swap in a different weave: browse https://polyhaven.com/textures/fabric,
- * grab the asset's slug from its URL (e.g. polyhaven.com/a/SLUG), and change
- * the id below — the URL pattern is the same for every Poly Haven texture.
- */
-
 export interface FabricWeave {
-  id: string; // Poly Haven asset slug
+  id: string;
   label: string;
   sourceUrl: string;
   diffuse: string;
   normal: string;
   roughness: string;
-  /** how many times the texture tiles across the pillow face — higher = finer-looking weave */
   repeat: number;
 }
 
@@ -44,3 +28,4 @@ export const FABRIC_WEAVES: Record<"linen" | "velvet" | "silk" | "floral", Fabri
   silk: polyhavenWeave("crepe_satin", "Silk/satin crepe", 3),
   floral: polyhavenWeave("floral_jacquard", "Floral jacquard", 3)
 };
+

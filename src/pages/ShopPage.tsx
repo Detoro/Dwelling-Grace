@@ -35,7 +35,6 @@ export function ShopPage() {
 
   return (
     <div style={{ maxWidth: 1240, margin: "0 auto", padding: "56px 24px 120px" }}>
-      {/* Breadcrumbs */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 11, color: COLORS.inkSoft, marginBottom: 20 }}>
         <Link to="/" style={{ color: COLORS.inkSoft, textDecoration: "none" }}>Home</Link>
         <span>/</span>
@@ -48,13 +47,13 @@ export function ShopPage() {
         description={activeCategory ? CATEGORY_DESCRIPTIONS[activeCategory] : CATEGORY_DESCRIPTIONS.all}
       />
 
-      {/* Filter Tabs */}
       <div style={{ display: "flex", gap: 10, margin: "32px 0 44px", flexWrap: "wrap" }}>
         <FilterPill to="/shop" label="All Pieces" active={!activeCategory} count={5} />
         {CATEGORIES.map((c) => (
           <FilterPill key={c} to={`/shop/${c}`} label={CATEGORY_LABELS[c]} active={activeCategory === c} />
         ))}
       </div>
+
 
       {loading ? (
         <div style={{ padding: "80px 0", textAlign: "center", fontFamily: FONT_MONO, color: COLORS.inkSoft }}>
