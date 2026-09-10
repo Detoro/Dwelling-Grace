@@ -108,7 +108,7 @@ export function HomePage() {
               Compose multi-pillow sets in real-time before you stitch.
             </h2>
             <p style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(247, 245, 238, 0.8)", margin: "0 0 28px", maxWidth: 540 }}>
-              Test Belgian linens side-by-side with Italian velvets. Add bespoke monograms with light-reactive satin thread sheen, preview the entire couch arrangement, and batch order with a single click.
+              Test linens side-by-side with velvets. Add monograms with light-reactive linen thread sheen, preview the entire couch arrangement, and batch order with a single click.
             </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <Link to="/designer" className="btn-gold" style={{ padding: "14px 30px" }}>
@@ -127,7 +127,7 @@ export function HomePage() {
             }}
           >
             <p style={{ fontFamily: FONT_MONO, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", color: COLORS.goldLight, marginBottom: 16 }}>
-              Atelier Features
+              Features
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 16 }}>
               <li style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -141,7 +141,7 @@ export function HomePage() {
                 <span style={{ color: COLORS.gold, fontWeight: 700 }}>&bull;</span>
                 <div>
                   <strong style={{ fontFamily: FONT_DISPLAY, fontSize: 17, display: "block", color: COLORS.cream }}>Raised Thread Bump Shaders</strong>
-                  <span style={{ fontSize: 13, color: "rgba(247, 245, 238, 0.7)" }}>Authentic micro-ridged satin stitching that glistens dynamically under studio lights.</span>
+                  <span style={{ fontSize: 13, color: "rgba(247, 245, 238, 0.7)" }}>Authentic micro-ridged linen stitching that glistens dynamically under studio lights.</span>
                 </div>
               </li>
               <li style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -167,4 +167,3 @@ export function HomePage() {
     </>
   );
 }
-

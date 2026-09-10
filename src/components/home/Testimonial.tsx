@@ -5,7 +5,7 @@ import { Reveal } from "../ui/Reveal";
 const REVIEWS = [
   {
     quote:
-      "I sent them a swatch from my grandmother's vintage tablecloth and they matched the contrast piping to it exactly. It doesn't look like anything from a mass catalog — it feels like an heirloom.",
+      "I sent them a swatch from my grandmother's vintage tablecloth and they matched it exactly. It doesn't look like anything from a mass catalog — it feels like an heirloom.",
     author: "Marisol A.",
     location: "Austin, Texas",
     item: "Hearth Pillow in Wine Velvet with Gold Monogram",
@@ -15,7 +15,7 @@ const REVIEWS = [
       "The real-time 3D designer made it so effortless to coordinate our living room trio before buying. When the package arrived wrapped in cotton, the raised embroidery took my breath away.",
     author: "Julian & Clara K.",
     location: "Brooklyn, New York",
-    item: "Bespoke 3-Pillow Living Room Set in Oat Linen",
+    item: "3-Pillow Living Room Set in Oat Linen",
   },
 ];
 
@@ -96,4 +96,3 @@ export function Testimonial() {
   );
 
 }
-

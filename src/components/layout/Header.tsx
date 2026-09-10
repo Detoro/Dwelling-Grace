@@ -28,7 +28,7 @@ export function Header() {
           borderBottom: `1px solid ${COLORS.lineOnDark}`,
         }}
       >
-        <span>Bespoke made-to-order pillows &bull; Handcrafted in small batches &bull; Free US shipping over $150</span>
+        <span>Made-to-order pillows &bull; Handcrafted in small batches</span>
       </div>
 
       <header

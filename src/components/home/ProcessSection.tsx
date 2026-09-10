@@ -6,12 +6,12 @@ const STEPS = [
   {
     step: "01",
     title: "Select Natural Weave",
-    body: "Belgian flax linen, plush Italian velvet, and lustrous silk crepe — pure natural fibers cut from bolts we store in our workroom.",
+    body: "Flax linen, plush velvet, and lustrous silk crepe — pure natural fibers cut from bolts we store in our workroom.",
   },
   {
     step: "02",
     title: "Personalize Trims & Monogram",
-    body: "Select contrast piping, horn buttons or hidden zip closures, and add your custom 1–3 letter monogram in raised embroidery.",
+    body: "Add your custom letter monogram in raised embroidery.",
   },
   {
     step: "03",
@@ -88,4 +88,3 @@ export function ProcessSection() {
     </section>
   );
 }
-

@@ -44,7 +44,7 @@ export function Footer() {
               </p>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(247, 245, 238, 0.7)", maxWidth: 300 }}>
-              Made-to-order pillows, cushions, and bespoke monograms crafted from natural European linens and Italian velvets.
+              Made-to-order pillows, cushions, and monograms crafted from natural linens and velvets.
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export function Footer() {
 
           <div>
             <p style={{ fontFamily: FONT_MONO, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", color: COLORS.goldLight, marginBottom: 14 }}>
-              The Atelier Standard
+              The Standard
             </p>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(247, 245, 238, 0.7)" }}>
               Every pillow is hand-cut and finished individually in our dedicated workroom.
@@ -129,4 +129,3 @@ function FooterColumn({ title, links }: { title: string; links: { to: string; la
     </div>
   );
 }
-

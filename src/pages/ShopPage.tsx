@@ -12,8 +12,8 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
 };
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  all: "Every piece cut and finished to order from European linen bolts and Italian velvets.",
-  pillow: "Square and lumbar cushion covers tailored to your desired size and trim.",
+  all: "Every piece cut and finished to order by African Artisans.",
+  pillow: "Square cushion covers tailored to your desired size and trim.",
   accessory: "95/5 feather-down inserts, custom monogramming, and studio accessories.",
 };
 
@@ -43,7 +43,7 @@ export function ShopPage() {
 
       <SectionHead
         eyebrow="Curated Catalog"
-        title={activeCategory ? CATEGORY_LABELS[activeCategory] : "The Atelier Collection"}
+        title={activeCategory ? CATEGORY_LABELS[activeCategory] : "The Collection"}
         description={activeCategory ? CATEGORY_DESCRIPTIONS[activeCategory] : CATEGORY_DESCRIPTIONS.all}
       />
 
@@ -90,4 +90,3 @@ function FilterPill({ to, label, active }: { to: string; label: string; active: 
     </Link>
   );
 }
-

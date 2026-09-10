@@ -9,17 +9,12 @@ function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-const FREE_SHIPPING_THRESHOLD_CENTS = 15000;
-
 export function CartDrawer() {
   const { lines, subtotal, isDrawerOpen, closeDrawer, setQuantity, removeLine } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   if (!isDrawerOpen) return null;
-
-  const amountRemainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD_CENTS - subtotal);
-  const shippingProgressPct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_CENTS) * 100));
 
   async function handleCheckout() {
     setCheckoutError(null);
@@ -96,27 +91,6 @@ export function CartDrawer() {
           >
             &#10005;
           </button>
-        </div>
-
-        <div style={{ background: COLORS.creamDim, padding: "14px 24px", borderBottom: `1px solid ${COLORS.line}` }}>
-          <p style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: COLORS.ink, margin: "0 0 8px" }}>
-            {amountRemainingForFreeShipping === 0 ? (
-              <span style={{ color: COLORS.success, fontWeight: 600 }}>&#10003; You have unlocked Free US Shipping!</span>
-            ) : (
-              <span>Add <strong>{formatPrice(amountRemainingForFreeShipping)}</strong> more for Complimentary Shipping</span>
-            )}
-          </p>
-          <div style={{ width: "100%", height: 5, background: "rgba(26, 24, 21, 0.1)", borderRadius: 999, overflow: "hidden" }}>
-            <div
-              style={{
-                width: `${shippingProgressPct}%`,
-                height: "100%",
-                background: amountRemainingForFreeShipping === 0 ? COLORS.success : COLORS.gold,
-                borderRadius: 999,
-                transition: "width 0.3s ease",
-              }}
-            />
-          </div>
         </div>
 
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>

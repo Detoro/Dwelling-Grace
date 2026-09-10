@@ -5,7 +5,7 @@ const ARTICLES = [
   {
     tag: "Fabric Care",
     date: "August 2026",
-    title: "How to Care for Natural Belgian Flax Linen",
+    title: "How to Care for Natural Flax Linen",
     excerpt:
       "Flax linen grows softer and more pliable with age. Discover our workroom methods for spot cleaning, steaming, and preserving the natural slub texture of your covers.",
     readTime: "4 min read",
@@ -13,7 +13,7 @@ const ARTICLES = [
   {
     tag: "Studio Sourcing",
     date: "July 2026",
-    title: "Why We Source Small-Batch Italian Cotton Velvet",
+    title: "Why We Source Small-Batch from Africa",
     excerpt:
       "Unlike synthetic polyester velvets, dense-pile cotton velvet captures ambient room light with depth and tactile softness that synthetics can never replicate.",
     readTime: "6 min read",
@@ -34,7 +34,7 @@ export function JournalPage() {
       <SectionHead
         eyebrow="Journal & Workroom Notes"
         title="Stories from the cutting table"
-        description="Insights on European natural fibers, pillow styling, care guides, and behind-the-scenes techniques from our studio."
+        description="Insights on natural fibers, pillow styling, care guides, and behind-the-scenes techniques from our studio."
       />
 
       <div

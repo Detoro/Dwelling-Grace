@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { SwatchButton } from "../ui/SwatchButton";
 import { MonogramPanel } from "./MonogramPanel";
 import type { PillowDesignState } from "../../types/designer";
-import { CLOSURES, FABRICS, PIPING, SIZES } from "../../data/designerOptions";
+import { useDesignerOptions } from "../../context/DesignerOptionsContext";
 import { COLORS, FONT_MONO } from "../../theme";
 
 interface PillowDesignerPanelProps {
@@ -11,14 +11,16 @@ interface PillowDesignerPanelProps {
 }
 
 export function PillowDesignerPanel({ design, onChange }: PillowDesignerPanelProps) {
+  const { fabrics, sizes } = useDesignerOptions();
+
   function set<K extends keyof PillowDesignState>(key: K, value: PillowDesignState[K]) {
     onChange({ ...design, [key]: value });
   }
 
   return (
     <div>
-      <OptionGroup label="1. Select Fabric" subtitle="Natural Belgian linen & Italian velvet">
-        {FABRICS.map((f) => (
+      <OptionGroup label="Select Fabric" subtitle="Corduroy linen & velvet">
+        {fabrics.map((f) => (
           <SwatchButton
             key={f.id}
             label={f.label}
@@ -30,19 +32,11 @@ export function PillowDesignerPanel({ design, onChange }: PillowDesignerPanelPro
         ))}
       </OptionGroup>
 
-      <OptionGroup label="2. Cushion Dimensions" subtitle="Standard tailored sizes">
-        <PillGroup options={SIZES} selectedId={design.sizeId} onSelect={(id) => set("sizeId", id)} />
+      <OptionGroup label="Cushion Dimensions" subtitle="Standard tailored sizes">
+        <PillGroup options={sizes} selectedId={design.sizeId} onSelect={(id) => set("sizeId", id)} />
       </OptionGroup>
 
-      <OptionGroup label="3. Edge Detailing" subtitle="Contrast piping or knife-edge">
-        <PillGroup options={PIPING} selectedId={design.pipingId} onSelect={(id) => set("pipingId", id)} />
-      </OptionGroup>
-
-      <OptionGroup label="4. Closure Mechanism" subtitle="Hidden or horn button finish">
-        <PillGroup options={CLOSURES} selectedId={design.closureId} onSelect={(id) => set("closureId", id)} />
-      </OptionGroup>
-
-      <OptionGroup label="5. Custom Monogram" subtitle="Embroidered initials & bespoke finish">
+      <OptionGroup label="Custom Monogram" subtitle="Embroidered initials">
         <MonogramPanel design={design} onChange={onChange} />
       </OptionGroup>
 
@@ -124,4 +118,3 @@ function PillGroup({
     </>
   );
 }
-
