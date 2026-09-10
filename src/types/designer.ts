@@ -3,27 +3,31 @@ export interface DesignerOption {
   label: string;
   priceDelta: number;
   swatchHex?: string;
-  weave?: "linen" | "velvet" | "silk" | "floral";
+  weave?: string;
 }
 
-export type MonogramFont = "serif" | "sans" | "script" | "mono";
-export type MonogramTexture = "satin" | "silk" | "cotton" | "metallic";
-export type MonogramSpacing = "tight" | "standard" | "wide";
-export type MonogramSize = "sm" | "md" | "lg";
+export type MonogramFont = "serif" | "sans" | "futura" | "mono";
+export type MonogramTexture = "damaske" | "silk" | "cotton" | "linen";
+export type MonogramSpacing = "standard" | "wide";
+export type MonogramSize = "sm" | "md" | "lg" | "xl";
+export type MonogramPlacement = "front" | "back" | "both";
+export type MonogramWrapMode = "single-line" | "multiline";
 
 export interface PillowDesignState {
   id?: string;
   name?: string;
   fabricId: string;
   sizeId: string;
-  pipingId: string;
-  closureId: string;
   monogram?: string;
+  monogramBack?: string;
+  monogramPlacement?: MonogramPlacement;
+  monogramWrapMode?: MonogramWrapMode;
   monogramFont?: MonogramFont;
   monogramTexture?: MonogramTexture;
   monogramColor?: string;
   monogramSpacing?: MonogramSpacing;
   monogramSize?: MonogramSize;
+  monogramScale?: number;
   quantity: number;
 }
 
@@ -33,14 +37,16 @@ export const DEFAULT_PILLOW_DESIGN: PillowDesignState = {
   name: "Pillow 1",
   fabricId: "linen-oat",
   sizeId: "18x18",
-  pipingId: "piping-none",
-  closureId: "closure-hidden-zip",
   monogram: "",
+  monogramBack: "",
+  monogramPlacement: "front",
+  monogramWrapMode: "multiline",
   monogramFont: "serif",
-  monogramTexture: "satin",
+  monogramTexture: "linen",
   monogramColor: "auto",
   monogramSpacing: "standard",
   monogramSize: "md",
+  monogramScale: 1.0,
   quantity: 1,
 };
 
@@ -50,15 +56,16 @@ export function createNewPillowDesign(index: number, fabricId: string = "linen-o
     name: `Pillow ${index}`,
     fabricId,
     sizeId: "18x18",
-    pipingId: "piping-none",
-    closureId: "closure-hidden-zip",
     monogram: "",
+    monogramBack: "",
+    monogramPlacement: "front",
+    monogramWrapMode: "multiline",
     monogramFont: "serif",
-    monogramTexture: "satin",
+    monogramTexture: "linen",
     monogramColor: "auto",
     monogramSpacing: "standard",
     monogramSize: "md",
+    monogramScale: 1.0,
     quantity: 1,
   };
 }
-

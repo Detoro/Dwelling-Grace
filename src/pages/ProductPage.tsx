@@ -203,7 +203,6 @@ export function ProductPage() {
             <div>&bull; Hand-stitched in small batches</div>
             <div>&bull; Ships in 2–3 weeks</div>
             <div>&bull; 95/5 Feather-down compatible</div>
-            <div>&bull; Free shipping over $150</div>
           </div>
 
           <div style={{ marginTop: 36 }}>

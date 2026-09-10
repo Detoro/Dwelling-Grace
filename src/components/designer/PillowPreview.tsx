@@ -4,17 +4,83 @@ import { Canvas } from "@react-three/fiber";
 import { Center, ContactShadows, OrbitControls, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { COLORS, FONT_MONO } from "../../theme";
-import { FABRICS, PIPING, findOption } from "../../data/designerOptions";
-import { FABRIC_WEAVES } from "../../data/fabricTextures";
+import { useDesignerOptions } from "../../context/DesignerOptionsContext";
+import { FABRIC_WEAVES, getFabricWeave } from "../../data/fabricTextures";
 import type {
   MonogramFont,
+  MonogramPlacement,
   MonogramSpacing,
   MonogramTexture,
+  MonogramWrapMode,
   PillowDesignState,
 } from "../../types/designer";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}pillow__black/scene.gltf`;
 
+type DecalDirectionKey = "front" | "back";
+
+const DECAL_DIRECTIONS: Record<DecalDirectionKey, THREE.Vector3> = {
+  front: new THREE.Vector3(0, 0, 1),
+  back: new THREE.Vector3(0, 0, -1),
+};
+
+interface DecalAnchor {
+  position: [number, number, number];
+  quaternion: [number, number, number, number];
+}
+
+function computeDecalAnchor(
+  meshes: THREE.Mesh[],
+  direction: THREE.Vector3,
+  probeDistance: number,
+  surfaceOffset: number,
+  fallbackPosition: [number, number, number],
+  fallbackRotation: [number, number, number]
+): DecalAnchor {
+  const raycaster = new THREE.Raycaster();
+  const origin = direction.clone().multiplyScalar(probeDistance);
+  const rayDirection = direction.clone().negate();
+  raycaster.set(origin, rayDirection);
+  raycaster.far = probeDistance * 2;
+
+  const hits = raycaster.intersectObjects(meshes, false);
+  const hit = hits.find((h) => !!h.face);
+
+  if (!hit || !hit.face) {
+    console.warn(
+      `[PillowPreview] Decal probe toward (${direction.x}, ${direction.y}, ${direction.z}) found no surface — using fallback placement. The mesh may have a gap in that direction.`
+    );
+    const fallbackQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...fallbackRotation));
+    return {
+      position: fallbackPosition,
+      quaternion: [fallbackQuat.x, fallbackQuat.y, fallbackQuat.z, fallbackQuat.w],
+    };
+  }
+
+  const normalMatrix = new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld);
+  const worldNormal = hit.face.normal.clone().applyMatrix3(normalMatrix).normalize();
+  const point = hit.point.clone().addScaledVector(worldNormal, surfaceOffset);
+
+  const forward = new THREE.Vector3(0, 0, 1);
+  const alignQuat = new THREE.Quaternion().setFromUnitVectors(forward, worldNormal);
+
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let tangentUp = worldUp.clone().addScaledVector(worldNormal, -worldUp.dot(worldNormal));
+  if (tangentUp.lengthSq() < 1e-6) {
+    const worldZ = new THREE.Vector3(0, 0, 1);
+    tangentUp = worldZ.clone().addScaledVector(worldNormal, -worldZ.dot(worldNormal));
+  }
+  tangentUp.normalize();
+
+  const rotatedUp = new THREE.Vector3(0, 1, 0).applyQuaternion(alignQuat);
+  const twistQuat = new THREE.Quaternion().setFromUnitVectors(rotatedUp, tangentUp);
+  const finalQuat = twistQuat.multiply(alignQuat);
+
+  return {
+    position: [point.x, point.y, point.z],
+    quaternion: [finalQuat.x, finalQuat.y, finalQuat.z, finalQuat.w],
+  };
+}
 
 export interface PillowPreviewProps {
   pillows?: PillowDesignState[];
@@ -47,15 +113,16 @@ export function PillowPreview({
 
   const effectiveViewMode = pillowList.length > 1 ? viewMode : "focus";
 
-  const fabric = findOption(FABRICS, activePillow?.fabricId ?? "linen-oat");
-  const weave = FABRIC_WEAVES[fabric.weave ?? "linen"];
+  const { fabrics, findOption } = useDesignerOptions();
+  const fabric = findOption(fabrics, activePillow?.fabricId ?? "linen-oat");
+  const weave = getFabricWeave(fabric?.weave);
 
   return (
     <div
       style={{
         aspectRatio: "1 / 1",
         borderRadius: 16,
-        background: COLORS.bgDeep2,
+        background: COLORS.cream,
         position: "relative",
         overflow: "hidden",
       }}
@@ -126,6 +193,8 @@ export function PillowPreview({
           <directionalLight position={[3.5, 4.5, 3]} intensity={1.35} />
           <directionalLight position={[-3, 1.5, -2]} intensity={0.45} />
           <directionalLight position={[0, 3, -3]} intensity={0.35} />
+          <directionalLight position={[-1.2, 2.5, 3.8]} intensity={0.85} />
+          <pointLight position={[0, 0.6, 2.2]} intensity={0.5} distance={5} />
 
           <Suspense fallback={null}>
             <Center>
@@ -273,22 +342,29 @@ function PillowItem({
   position = [0, 0, 0],
   rotation = [0, 0, 0],
 }: PillowItemProps) {
-  const fabric = findOption(FABRICS, design.fabricId);
-  const piping = findOption(PIPING, design.pipingId);
-  const weave = FABRIC_WEAVES[fabric.weave ?? "linen"];
+  const { fabrics, findOption } = useDesignerOptions();
+  const fabric = findOption(fabrics, design.fabricId);
+  const weave = getFabricWeave(fabric?.weave);
   const fabricHex = fabric.swatchHex ?? "#D8CCB4";
-  const pipingHex = piping.id !== "piping-none" ? piping.swatchHex ?? COLORS.cream : null;
 
-  const monogram = design.monogram?.trim() ? design.monogram.trim().slice(0, 3).toUpperCase() : null;
+  const monogram = design.monogram?.trim() ? design.monogram.trim().toUpperCase() : null;
+  const monogramBack = design.monogramBack?.trim() ? design.monogramBack.trim().toUpperCase() : null;
+  const placement: MonogramPlacement = design.monogramPlacement ?? "front";
+  const wrapMode: MonogramWrapMode = design.monogramWrapMode ?? "multiline";
   const monogramFont = design.monogramFont ?? "serif";
-  const monogramTexture = design.monogramTexture ?? "satin";
+  const monogramTexture = design.monogramTexture ?? "linen";
   const monogramSpacing = design.monogramSpacing ?? "standard";
   const monogramSize = design.monogramSize ?? "md";
+  const monogramScaleMultiplier = design.monogramScale ?? (
+    monogramSize === "sm" ? 0.65 :
+    monogramSize === "lg" ? 1.35 :
+    monogramSize === "xl" ? 1.75 : 1.0
+  );
   const threadColor = (design.monogramColor && design.monogramColor !== "auto")
     ? design.monogramColor
     : threadColorFor(fabricHex);
 
-  const baseWorldSize = monogramSize === "sm" ? 0.30 : monogramSize === "lg" ? 0.48 : 0.38;
+  const baseWorldSize = 0.38 * monogramScaleMultiplier;
 
   const { scene } = useGLTF(MODEL_URL);
   const [diffuseMap, normalMap, roughnessMap] = useTexture([weave.diffuse, weave.normal, weave.roughness]);
@@ -321,6 +397,24 @@ function PillowItem({
     });
     return found;
   }, [cloned]);
+
+  const modelExtent = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(cloned);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    return Math.max(size.x, size.y, size.z) || 200;
+  }, [cloned]);
+
+  const decalAnchors = useMemo(() => {
+    if (meshes.length === 0) return null;
+    cloned.updateMatrixWorld(true);
+    const probeDistance = modelExtent * 1.5;
+    const surfaceOffset = modelExtent * 0.004;
+    return {
+      front: computeDecalAnchor(meshes, DECAL_DIRECTIONS.front, probeDistance, surfaceOffset, [0, 0, 46.8], [0, 0, 0]),
+      back: computeDecalAnchor(meshes, DECAL_DIRECTIONS.back, probeDistance, surfaceOffset, [0, 0, -46.8], [0, Math.PI, 0]),
+    };
+  }, [meshes, cloned, modelExtent]);
 
   useEffect(() => {
     meshes.forEach((mesh) => {
@@ -366,18 +460,6 @@ function PillowItem({
 
   useEffect(() => {
     const added: THREE.LineSegments[] = [];
-    if (pipingHex) {
-      meshes.forEach((mesh) => {
-        const edges = new THREE.EdgesGeometry(mesh.geometry, 28);
-        const line = new THREE.LineSegments(
-          edges,
-          new THREE.LineBasicMaterial({ color: pipingHex, linewidth: 2 })
-        );
-        line.name = "piping-outline";
-        mesh.add(line);
-        added.push(line);
-      });
-    }
     return () => {
       added.forEach((line) => {
         line.geometry.dispose();
@@ -385,33 +467,67 @@ function PillowItem({
         line.parent?.remove(line);
       });
     };
-  }, [meshes, pipingHex]);
+  }, [meshes]);
 
-  const monogramPlacement = useMemo(() => {
-    if (!monogram || meshes.length === 0) return null;
-
-    return {
-      position: [0.0, 0.0, 46.8] as [number, number, number],
-      rotation: [0, 0, 0] as [number, number, number],
-      size: baseWorldSize / baseScale,
-    };
-  }, [monogram, meshes, baseScale, baseWorldSize]);
+  const decalSize = baseWorldSize / baseScale;
 
   return (
     <group position={position} rotation={rotation}>
       <group scale={finalScale}>
         <primitive object={cloned} />
-        {monogram && monogramPlacement && (
+        {monogram && meshes.length > 0 && placement === "front" && decalAnchors && (
           <MonogramDecal
             text={monogram}
             font={monogramFont}
             texture={monogramTexture}
             threadColor={threadColor}
             spacing={monogramSpacing}
-            position={monogramPlacement.position}
-            rotation={monogramPlacement.rotation}
-            size={monogramPlacement.size}
+            position={decalAnchors.front.position}
+            quaternion={decalAnchors.front.quaternion}
+            size={decalSize}
+            wrapMode={wrapMode}
           />
+        )}
+
+        {monogram && meshes.length > 0 && placement === "back" && decalAnchors && (
+          <MonogramDecal
+            text={monogramBack || monogram}
+            font={monogramFont}
+            texture={monogramTexture}
+            threadColor={threadColor}
+            spacing={monogramSpacing}
+            position={decalAnchors.back.position}
+            quaternion={decalAnchors.back.quaternion}
+            size={decalSize}
+            wrapMode={wrapMode}
+          />
+        )}
+
+        {monogram && meshes.length > 0 && placement === "both" && decalAnchors && (
+          <>
+            <MonogramDecal
+              text={monogram}
+              font={monogramFont}
+              texture={monogramTexture}
+              threadColor={threadColor}
+              spacing={monogramSpacing}
+              position={decalAnchors.front.position}
+              quaternion={decalAnchors.front.quaternion}
+              size={decalSize}
+              wrapMode={wrapMode}
+            />
+            <MonogramDecal
+              text={monogramBack || monogram}
+              font={monogramFont}
+              texture={monogramTexture}
+              threadColor={threadColor}
+              spacing={monogramSpacing}
+              position={decalAnchors.back.position}
+              quaternion={decalAnchors.back.quaternion}
+              size={decalSize}
+              wrapMode={wrapMode}
+            />
+          </>
         )}
       </group>
     </group>
@@ -426,6 +542,9 @@ function threadColorFor(fabricHex: string): string {
   if (upper.includes("C7A24C")) return "#0C1826";
   if (upper.includes("B97D5D")) return "#FBF9F4";
   if (upper.includes("D8CCB4")) return "#141E28";
+  if (upper.includes("243324")) return "#E5C158";
+  if (upper.includes("8B3E2F")) return "#F0DFB0";
+  if (upper.includes("B87A4B")) return "#141E28";
 
   const hex = fabricHex.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -442,25 +561,103 @@ interface MonogramDecalProps {
   threadColor: string;
   spacing: MonogramSpacing;
   position: [number, number, number];
-  rotation: [number, number, number];
+  quaternion: [number, number, number, number];
   size: number;
+  heightRatio?: number;
+  wrapMode?: MonogramWrapMode;
+}
+
+function getFontFamily(font: MonogramFont): string {
+  if (font === "futura") {
+    return `"Futura", "Trebuchet MS", sans-serif`;
+  }
+  if (font === "sans") {
+    return `"Plus Jakarta Sans", -apple-system, sans-serif`;
+  }
+  if (font === "mono") {
+    return `"Space Mono", monospace`;
+  }
+  return `"Playfair Display", Georgia, "Times New Roman", serif`;
+}
+
+function measureLineWidth(ctx: CanvasRenderingContext2D, line: string, spacingOffset: number): number {
+  if (!line) return 0;
+  if (line.length <= 1) return ctx.measureText(line).width;
+  const chars = line.split("");
+  const totalCharWidth = chars.reduce((sum, c) => sum + ctx.measureText(c).width, 0);
+  return totalCharWidth + (chars.length - 1) * spacingOffset;
+}
+
+function splitIntoWrappedLines(
+  ctx: CanvasRenderingContext2D,
+  rawText: string,
+  maxWidth: number,
+  spacingOffset: number
+): string[] {
+  const paragraphs = rawText.split("\n");
+  const result: string[] = [];
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) {
+      if (paragraphs.length > 1) result.push("");
+      continue;
+    }
+
+    const words = trimmed.split(/\s+/);
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (measureLineWidth(ctx, testLine, spacingOffset) <= maxWidth) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          result.push(currentLine);
+          currentLine = "";
+        }
+        if (measureLineWidth(ctx, word, spacingOffset) <= maxWidth) {
+          currentLine = word;
+        } else {
+          let broken = "";
+          for (const char of word) {
+            if (measureLineWidth(ctx, broken + char, spacingOffset) <= maxWidth) {
+              broken += char;
+            } else {
+              if (broken) result.push(broken);
+              broken = char;
+            }
+          }
+          currentLine = broken;
+        }
+      }
+    }
+
+    if (currentLine) {
+      result.push(currentLine);
+    }
+  }
+
+  return result.length > 0 ? result : [rawText];
 }
 
 function MonogramDecal({
   text,
   font = "serif",
-  texture = "satin",
+  texture = "linen",
   threadColor,
   spacing = "standard",
   position,
-  rotation,
+  quaternion,
   size,
+  heightRatio = 0.5,
+  wrapMode = "multiline",
 }: MonogramDecalProps) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   const { diffTex, bumpTex } = useMemo(() => {
     const width = 1024;
-    const height = 512;
+    const height = Math.round(1024 * heightRatio);
 
     const diffCanvas = document.createElement("canvas");
     diffCanvas.width = width;
@@ -477,19 +674,38 @@ function MonogramDecal({
       bumpCtx.fillStyle = "#000000";
       bumpCtx.fillRect(0, 0, width, height);
 
-      let fontStyle = `bold 165px "Playfair Display", Georgia, "Times New Roman", serif`;
-      let textOffsetY = 10;
-      if (font === "script") {
-        fontStyle = `italic 195px "Great Vibes", "Brush Script MT", cursive`;
-        textOffsetY = 5;
-      } else if (font === "sans") {
-        fontStyle = `bold 155px "Plus Jakarta Sans", -apple-system, sans-serif`;
-        textOffsetY = 8;
-      } else if (font === "mono") {
-        fontStyle = `bold 140px "Space Mono", monospace`;
-        textOffsetY = 8;
+      const cleanText = text.toUpperCase();
+      const spacingOffset = spacing === "wide" ? 30 : 6;
+      const maxTextWidth = width * 0.88;
+      const maxTextHeight = height * 0.82;
+
+      let fontSize = heightRatio <= 0.35 ? 120 : 165;
+      if (font === "mono") fontSize = Math.round(fontSize * 0.88);
+
+      let lines: string[] = [];
+      let lineHeight = fontSize * 1.18;
+
+      while (fontSize >= 18) {
+        const fontStyle = `bold ${fontSize}px ${getFontFamily(font)}`;
+        diffCtx.font = fontStyle;
+        lineHeight = fontSize * 1.18;
+
+        if (wrapMode === "single-line") {
+          lines = [cleanText.replace(/\n+/g, " ")];
+        } else {
+          lines = splitIntoWrappedLines(diffCtx, cleanText, maxTextWidth, spacingOffset);
+        }
+
+        const fitsHeight = lines.length * lineHeight <= maxTextHeight;
+        const fitsWidth = lines.every((line) => measureLineWidth(diffCtx, line, spacingOffset) <= maxTextWidth);
+
+        if (fitsHeight && fitsWidth) {
+          break;
+        }
+        fontSize -= 4;
       }
 
+      const fontStyle = `bold ${fontSize}px ${getFontFamily(font)}`;
       diffCtx.font = fontStyle;
       diffCtx.textAlign = "center";
       diffCtx.textBaseline = "middle";
@@ -498,26 +714,28 @@ function MonogramDecal({
       bumpCtx.textAlign = "center";
       bumpCtx.textBaseline = "middle";
 
-      const cleanText = text.slice(0, 3).toUpperCase();
       const cx = width / 2;
-      const cy = height / 2 + textOffsetY;
-
-      const spacingOffset = spacing === "tight" ? -14 : spacing === "wide" ? 30 : 6;
+      const cy = height / 2;
+      const totalBlockHeight = lines.length * lineHeight;
+      const startY = cy - totalBlockHeight / 2 + lineHeight / 2;
 
       const drawText = (ctx: CanvasRenderingContext2D, fill: string) => {
         ctx.fillStyle = fill;
-        if (cleanText.length <= 1) {
-          ctx.fillText(cleanText, cx, cy);
-        } else {
-          const chars = cleanText.split("");
-          const widths = chars.map((c) => ctx.measureText(c).width);
-          const totalWidth = widths.reduce((acc, w) => acc + w, 0) + (chars.length - 1) * spacingOffset;
-          let currentX = cx - totalWidth / 2;
-          chars.forEach((c, i) => {
-            ctx.fillText(c, currentX + widths[i] / 2, cy);
-            currentX += widths[i] + spacingOffset;
-          });
-        }
+        lines.forEach((line, lineIdx) => {
+          const y = startY + lineIdx * lineHeight;
+          if (line.length <= 1) {
+            ctx.fillText(line, cx, y);
+          } else {
+            const chars = line.split("");
+            const widths = chars.map((c) => ctx.measureText(c).width);
+            const totalLineWidth = widths.reduce((acc, w) => acc + w, 0) + (chars.length - 1) * spacingOffset;
+            let currentX = cx - totalLineWidth / 2;
+            chars.forEach((c, i) => {
+              ctx.fillText(c, currentX + widths[i] / 2, y);
+              currentX += widths[i] + spacingOffset;
+            });
+          }
+        });
       };
 
       drawText(bumpCtx, "#D0D0D0");
@@ -527,8 +745,8 @@ function MonogramDecal({
 
       if (texture === "silk") {
         bumpCtx.strokeStyle = "#FFFFFF";
-        bumpCtx.lineWidth = 2.4;
-        const step = 4.5;
+        bumpCtx.lineWidth = 1.8;
+        const step = 3.2;
         for (let x = -height; x < width + height; x += step) {
           bumpCtx.beginPath();
           bumpCtx.moveTo(x, 0);
@@ -537,8 +755,8 @@ function MonogramDecal({
         }
       } else if (texture === "cotton") {
         bumpCtx.strokeStyle = "#FFFFFF";
-        bumpCtx.lineWidth = 3.2;
-        const step = 7;
+        bumpCtx.lineWidth = 3.0;
+        const step = 6.0;
         for (let x = 0; x < width; x += step) {
           bumpCtx.beginPath();
           bumpCtx.moveTo(x, 0);
@@ -551,24 +769,40 @@ function MonogramDecal({
           bumpCtx.lineTo(width, y);
           bumpCtx.stroke();
         }
-      } else if (texture === "metallic") {
+      } else if (texture === "linen") {
+        const step = 5.2;
         bumpCtx.strokeStyle = "#FFFFFF";
-        bumpCtx.lineWidth = 4.5;
-        const step = 6;
-        for (let x = -height; x < width + height; x += step) {
+        for (let x = 0; x < width; x += step) {
+          bumpCtx.lineWidth = (Math.round(x / step) % 3 === 0) ? 3.4 : 2.0;
           bumpCtx.beginPath();
           bumpCtx.moveTo(x, 0);
-          bumpCtx.lineTo(x + height * 0.9, height);
+          bumpCtx.lineTo(x, height);
+          bumpCtx.stroke();
+        }
+        bumpCtx.strokeStyle = "#E0E0E0";
+        for (let y = 0; y < height; y += step) {
+          bumpCtx.lineWidth = (Math.round(y / step) % 3 === 0) ? 3.2 : 1.8;
+          bumpCtx.beginPath();
+          bumpCtx.moveTo(0, y);
+          bumpCtx.lineTo(width, y);
           bumpCtx.stroke();
         }
       } else {
+        const step = 6.0;
         bumpCtx.strokeStyle = "#FFFFFF";
-        bumpCtx.lineWidth = 4;
-        const step = 7;
+        bumpCtx.lineWidth = 2.6;
         for (let x = -height; x < width + height; x += step) {
           bumpCtx.beginPath();
           bumpCtx.moveTo(x, 0);
-          bumpCtx.lineTo(x + height * 0.75, height);
+          bumpCtx.lineTo(x + height * 0.72, height);
+          bumpCtx.stroke();
+        }
+        bumpCtx.strokeStyle = "#303030";
+        bumpCtx.lineWidth = 2.0;
+        for (let x = -height; x < width + height; x += step) {
+          bumpCtx.beginPath();
+          bumpCtx.moveTo(x + height * 0.72, 0);
+          bumpCtx.lineTo(x, height);
           bumpCtx.stroke();
         }
       }
@@ -580,67 +814,74 @@ function MonogramDecal({
       diffCtx.globalCompositeOperation = "source-atop";
 
       if (texture === "silk") {
-        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.42)";
-        diffCtx.lineWidth = 1.8;
-        const step = 4.5;
+        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.52)";
+        diffCtx.lineWidth = 1.6;
+        const step = 3.2;
         for (let x = -height; x < width + height; x += step) {
           diffCtx.beginPath();
           diffCtx.moveTo(x, 0);
           diffCtx.lineTo(x + height * 0.55, height);
           diffCtx.stroke();
         }
+        diffCtx.strokeStyle = "rgba(0, 0, 0, 0.18)";
+        diffCtx.lineWidth = 1.0;
+        for (let x = -height + 1.6; x < width + height; x += step) {
+          diffCtx.beginPath();
+          diffCtx.moveTo(x, 0);
+          diffCtx.lineTo(x + height * 0.55, height);
+          diffCtx.stroke();
+        }
       } else if (texture === "cotton") {
-        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
         diffCtx.lineWidth = 2.0;
-        const step = 7;
+        const step = 6.0;
         for (let x = 0; x < width; x += step) {
           diffCtx.beginPath();
           diffCtx.moveTo(x, 0);
           diffCtx.lineTo(x, height);
           diffCtx.stroke();
         }
-        diffCtx.strokeStyle = "rgba(0, 0, 0, 0.22)";
+        diffCtx.strokeStyle = "rgba(0, 0, 0, 0.20)";
         for (let y = 0; y < height; y += step) {
           diffCtx.beginPath();
           diffCtx.moveTo(0, y);
           diffCtx.lineTo(width, y);
           diffCtx.stroke();
         }
-      } else if (texture === "metallic") {
-        diffCtx.strokeStyle = "rgba(255, 248, 210, 0.65)";
-        diffCtx.lineWidth = 2.4;
-        const step = 6;
-        for (let x = -height; x < width + height; x += step) {
+      } else if (texture === "linen") {
+        const step = 5.2;
+        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.18)";
+        for (let x = 0; x < width; x += step) {
+          diffCtx.lineWidth = (Math.round(x / step) % 3 === 0) ? 2.4 : 1.4;
           diffCtx.beginPath();
           diffCtx.moveTo(x, 0);
-          diffCtx.lineTo(x + height * 0.9, height);
+          diffCtx.lineTo(x, height);
           diffCtx.stroke();
         }
-        diffCtx.strokeStyle = "rgba(0, 0, 0, 0.40)";
-        diffCtx.lineWidth = 2.0;
-        for (let x = -height + 3.0; x < width + height; x += step) {
+        diffCtx.strokeStyle = "rgba(20, 15, 10, 0.22)";
+        for (let y = 0; y < height; y += step) {
+          diffCtx.lineWidth = (Math.round(y / step) % 3 === 0) ? 2.2 : 1.2;
           diffCtx.beginPath();
-          diffCtx.moveTo(x, 0);
-          diffCtx.lineTo(x + height * 0.9, height);
+          diffCtx.moveTo(0, y);
+          diffCtx.lineTo(width, y);
           diffCtx.stroke();
         }
       } else {
-        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-        diffCtx.lineWidth = 2.0;
-        const step = 7;
+        const step = 6.0;
+        diffCtx.strokeStyle = "rgba(255, 255, 255, 0.42)";
+        diffCtx.lineWidth = 2.2;
         for (let x = -height; x < width + height; x += step) {
           diffCtx.beginPath();
           diffCtx.moveTo(x, 0);
-          diffCtx.lineTo(x + height * 0.75, height);
+          diffCtx.lineTo(x + height * 0.72, height);
           diffCtx.stroke();
         }
-
         diffCtx.strokeStyle = "rgba(0, 0, 0, 0.28)";
-        diffCtx.lineWidth = 1.6;
-        for (let x = -height + 3.5; x < width + height; x += step) {
+        diffCtx.lineWidth = 1.8;
+        for (let x = -height; x < width + height; x += step) {
           diffCtx.beginPath();
-          diffCtx.moveTo(x, 0);
-          diffCtx.lineTo(x + height * 0.75, height);
+          diffCtx.moveTo(x + height * 0.72, 0);
+          diffCtx.lineTo(x, height);
           diffCtx.stroke();
         }
       }
@@ -655,7 +896,7 @@ function MonogramDecal({
     bTex.needsUpdate = true;
 
     return { diffTex: dTex, bumpTex: bTex };
-  }, [text, font, texture, threadColor, spacing]);
+  }, [text, font, texture, threadColor, spacing, wrapMode, heightRatio]);
 
   useEffect(() => {
     return () => {
@@ -667,41 +908,67 @@ function MonogramDecal({
   const materialProps = useMemo(() => {
     if (texture === "silk") {
       return {
-        bumpScale: 0.04,
-        roughness: 0.16,
-        metalness: 0.22,
+        bumpScale: 0.05,
+        roughness: 0.2,
+        metalness: 0.06,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.15,
+        sheen: 1.0,
+        sheenRoughness: 0.2,
       };
     }
     if (texture === "cotton") {
       return {
-        bumpScale: 0.08,
-        roughness: 0.88,
-        metalness: 0.02,
+        bumpScale: 0.09,
+        roughness: 0.95,
+        metalness: 0.0,
+        clearcoat: 0.0,
+        clearcoatRoughness: 0.6,
+        sheen: 0.0,
+        sheenRoughness: 0.5,
       };
     }
-    if (texture === "metallic") {
+    if (texture === "linen") {
       return {
-        bumpScale: 0.09,
-        roughness: 0.14,
-        metalness: 0.78,
+        bumpScale: 0.11,
+        roughness: 0.86,
+        metalness: 0.01,
+        clearcoat: 0.08,
+        clearcoatRoughness: 0.65,
+        sheen: 0.25,
+        sheenRoughness: 0.55,
       };
     }
     return {
-      bumpScale: 0.06,
-      roughness: 0.36,
-      metalness: 0.08,
+      bumpScale: 0.08,
+      roughness: 0.32,
+      metalness: 0.05,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.22,
+      sheen: 0.9,
+      sheenRoughness: 0.25,
     };
   }, [texture]);
 
   return (
-    <mesh ref={meshRef} position={position} rotation={rotation} renderOrder={2}>
-      <planeGeometry args={[size, size / 2]} />
-      <meshStandardMaterial
+    <mesh
+      ref={meshRef}
+      position={position}
+      quaternion={quaternion}
+      scale={[size, size * heightRatio, 1]}
+      renderOrder={2}
+    >
+      <planeGeometry args={[1, 1]} />
+      <meshPhysicalMaterial
         map={diffTex}
         bumpMap={bumpTex}
         bumpScale={materialProps.bumpScale}
         roughness={materialProps.roughness}
         metalness={materialProps.metalness}
+        clearcoat={materialProps.clearcoat}
+        clearcoatRoughness={materialProps.clearcoatRoughness}
+        sheen={materialProps.sheen}
+        sheenRoughness={materialProps.sheenRoughness}
         transparent={true}
         alphaTest={0.01}
         depthWrite={false}

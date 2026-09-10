@@ -10,7 +10,7 @@ export interface FabricWeave {
 
 const POLYHAVEN_CDN = "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k";
 
-function polyhavenWeave(assetId: string, label: string, repeat: number): FabricWeave {
+export function polyhavenWeave(assetId: string, label: string, repeat: number = 4): FabricWeave {
   return {
     id: assetId,
     label,
@@ -22,10 +22,20 @@ function polyhavenWeave(assetId: string, label: string, repeat: number): FabricW
   };
 }
 
-export const FABRIC_WEAVES: Record<"linen" | "velvet" | "silk" | "floral", FabricWeave> = {
-  linen: polyhavenWeave("rough_linen", "Linen weave", 4),
-  velvet: polyhavenWeave("velour_velvet", "Velvet pile", 3),
+export const FABRIC_WEAVES: Record<string, FabricWeave> = {
+  corduroy: polyhavenWeave("ribbed_corduroy", "Corduroy", 4),
+  ribbed_corduroy: polyhavenWeave("ribbed_corduroy", "Corduroy", 4),
+  rough_linen: polyhavenWeave("rough_linen", "Rough linen", 4),
+  linen: polyhavenWeave("rough_linen", "Rough linen", 4),
+  velour_velvet: polyhavenWeave("velour_velvet", "Velour velvet", 3),
+  velvet: polyhavenWeave("velour_velvet", "Velour velvet", 3),
   silk: polyhavenWeave("crepe_satin", "Silk/satin crepe", 3),
-  floral: polyhavenWeave("floral_jacquard", "Floral jacquard", 3)
+  floral: polyhavenWeave("floral_jacquard", "Floral jacquard", 3),
 };
 
+export function getFabricWeave(weaveName?: string): FabricWeave {
+  if (!weaveName) return FABRIC_WEAVES.rough_linen;
+  const key = weaveName.toLowerCase().trim();
+  if (FABRIC_WEAVES[key]) return FABRIC_WEAVES[key];
+  return polyhavenWeave(key, weaveName, 4);
+}

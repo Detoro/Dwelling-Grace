@@ -1,21 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { COLORS, FONT_DISPLAY, FONT_MONO } from "../theme";
 import { SectionHead } from "../components/ui/SectionHead";
 import { QuantityStepper } from "../components/ui/QuantityStepper";
 import { Toast } from "../components/ui/Toast";
 import { PillowDesignerPanel } from "../components/designer/PillowDesignerPanel";
 import { PillowPreview } from "../components/designer/PillowPreview";
-import {
-  computePillowPrice,
-  findOption,
-  FABRICS,
-  SIZES,
-  PIPING,
-  CLOSURES,
-  MONOGRAM_FONTS,
-  MONOGRAM_TEXTURES,
-} from "../data/designerOptions";
-
+import { useDesignerOptions } from "../context/DesignerOptionsContext";
 import { useCart } from "../context/CartContext";
 import {
   DEFAULT_PILLOW_DESIGN,
@@ -27,12 +17,32 @@ import heroImage from "../assets/hero.png";
 type DesignerTab = "pillow";
 
 export function DesignerPage() {
+  const {
+    fabrics,
+    sizes,
+    monogramFonts,
+    monogramTextures,
+    findOption,
+    computePillowPrice,
+  } = useDesignerOptions();
+
   const [tab, setTab] = useState<DesignerTab>("pillow");
   const [pillows, setPillows] = useState<PillowDesignState[]>([DEFAULT_PILLOW_DESIGN]);
   const [activePillowId, setActivePillowId] = useState<string>(DEFAULT_PILLOW_DESIGN.id ?? "pillow-1");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const { addLine } = useCart();
+
+  useEffect(() => {
+    if (fabrics.length > 0) {
+      setPillows((prev) =>
+        prev.map((p) => {
+          const exists = fabrics.some((f) => f.id === p.fabricId);
+          return exists ? p : { ...p, fabricId: fabrics[0].id };
+        })
+      );
+    }
+  }, [fabrics]);
 
   const activePillow = useMemo(() => {
     return pillows.find((p) => p.id === activePillowId) ?? pillows[0];
@@ -46,7 +56,7 @@ export function DesignerPage() {
 
   function handleAddPillow() {
     const nextIndex = pillows.length + 1;
-    const nextFabric = FABRICS[(nextIndex - 1) % FABRICS.length]?.id ?? "linen-oat";
+    const nextFabric = fabrics[(nextIndex - 1) % fabrics.length]?.id ?? fabrics[0]?.id ?? "linen-oat";
     const newPillow = createNewPillowDesign(nextIndex, nextFabric);
     setPillows((prev) => [...prev, newPillow]);
     if (newPillow.id) setActivePillowId(newPillow.id);
@@ -78,39 +88,38 @@ export function DesignerPage() {
     updateActivePillow({ ...activePillow, quantity: q });
   }
 
-  const activeUnitPrice = useMemo(() => computePillowPrice(activePillow), [activePillow]);
+  const activeUnitPrice = useMemo(() => computePillowPrice(activePillow), [computePillowPrice, activePillow]);
 
   const collectionTotal = useMemo(() => {
     return pillows.reduce((sum, p) => {
       const price = computePillowPrice(p);
       return sum + price * p.quantity;
     }, 0);
-  }, [pillows]);
+  }, [computePillowPrice, pillows]);
 
   const totalItemCount = useMemo(() => {
     return pillows.reduce((sum, p) => sum + p.quantity, 0);
   }, [pillows]);
 
   function handleAddSingleToBag() {
-    const fabric = findOption(FABRICS, activePillow.fabricId);
-    const size = findOption(SIZES, activePillow.sizeId);
-    const piping = findOption(PIPING, activePillow.pipingId);
-    const closure = findOption(CLOSURES, activePillow.closureId);
+    const fabric = findOption(fabrics, activePillow.fabricId);
+    const size = findOption(sizes, activePillow.sizeId);
 
     const selections = [
       { groupId: "fabric", optionId: fabric.id, optionLabel: fabric.label },
       { groupId: "size", optionId: size.id, optionLabel: size.label },
-      { groupId: "piping", optionId: piping.id, optionLabel: piping.label },
-      { groupId: "closure", optionId: closure.id, optionLabel: closure.label },
     ];
 
     if (activePillow.monogram?.trim()) {
-      const font = MONOGRAM_FONTS.find((f) => f.id === activePillow.monogramFont)?.label ?? "Classic Serif";
-      const tex = MONOGRAM_TEXTURES.find((t) => t.id === activePillow.monogramTexture)?.label ?? "Satin Stitch";
+      const font = monogramFonts.find((f) => f.id === activePillow.monogramFont)?.label ?? "Classic Serif";
+      const tex = monogramTextures.find((t) => t.id === activePillow.monogramTexture)?.label ?? "Linen Stitch";
+      const placementLabel =
+        activePillow.monogramPlacement === "both" ? "Both Sides" :
+        activePillow.monogramPlacement === "back" ? "Back Side" : "Front Side";
       selections.push({
         groupId: "monogram",
         optionId: "custom",
-        optionLabel: `Monogram "${activePillow.monogram.trim().toUpperCase()}" (${font}, ${tex})`,
+        optionLabel: `Monogram "${activePillow.monogram.trim().toUpperCase()}" (${placementLabel}, ${font}, ${tex})`,
       });
     }
 
@@ -125,14 +134,16 @@ export function DesignerPage() {
       designerConfig: {
         fabricId: activePillow.fabricId,
         sizeId: activePillow.sizeId,
-        pipingId: activePillow.pipingId,
-        closureId: activePillow.closureId,
         monogram: activePillow.monogram ?? "",
+        monogramBack: activePillow.monogramBack ?? "",
+        monogramPlacement: activePillow.monogramPlacement ?? "front",
+        monogramWrapMode: activePillow.monogramWrapMode ?? "multiline",
         monogramFont: activePillow.monogramFont ?? "serif",
-        monogramTexture: activePillow.monogramTexture ?? "satin",
+        monogramTexture: activePillow.monogramTexture ?? "linen",
         monogramColor: activePillow.monogramColor ?? "auto",
         monogramSpacing: activePillow.monogramSpacing ?? "standard",
         monogramSize: activePillow.monogramSize ?? "md",
+        monogramScale: String(activePillow.monogramScale ?? 1.0),
       },
     });
     setToastMessage(`Added ${activePillow.name ?? "custom pillow"} to your bag`);
@@ -140,26 +151,25 @@ export function DesignerPage() {
 
   function handleAddAllToBag() {
     pillows.forEach((p, idx) => {
-      const fabric = findOption(FABRICS, p.fabricId);
-      const size = findOption(SIZES, p.sizeId);
-      const piping = findOption(PIPING, p.pipingId);
-      const closure = findOption(CLOSURES, p.closureId);
+      const fabric = findOption(fabrics, p.fabricId);
+      const size = findOption(sizes, p.sizeId);
       const unitPrice = computePillowPrice(p);
 
       const selections = [
         { groupId: "fabric", optionId: fabric.id, optionLabel: fabric.label },
         { groupId: "size", optionId: size.id, optionLabel: size.label },
-        { groupId: "piping", optionId: piping.id, optionLabel: piping.label },
-        { groupId: "closure", optionId: closure.id, optionLabel: closure.label },
       ];
 
       if (p.monogram?.trim()) {
-        const font = MONOGRAM_FONTS.find((f) => f.id === p.monogramFont)?.label ?? "Classic Serif";
-        const tex = MONOGRAM_TEXTURES.find((t) => t.id === p.monogramTexture)?.label ?? "Satin Stitch";
+        const font = monogramFonts.find((f) => f.id === p.monogramFont)?.label ?? "Classic Serif";
+        const tex = monogramTextures.find((t) => t.id === p.monogramTexture)?.label ?? "Linen Stitch";
+        const placementLabel =
+          p.monogramPlacement === "both" ? "Both Sides" :
+          p.monogramPlacement === "back" ? "Back Side" : "Front Side";
         selections.push({
           groupId: "monogram",
           optionId: "custom",
-          optionLabel: `Monogram "${p.monogram.trim().toUpperCase()}" (${font}, ${tex})`,
+          optionLabel: `Monogram "${p.monogram.trim().toUpperCase()}" (${placementLabel}, ${font}, ${tex})`,
         });
       }
 
@@ -174,14 +184,16 @@ export function DesignerPage() {
         designerConfig: {
           fabricId: p.fabricId,
           sizeId: p.sizeId,
-          pipingId: p.pipingId,
-          closureId: p.closureId,
           monogram: p.monogram ?? "",
+          monogramBack: p.monogramBack ?? "",
+          monogramPlacement: p.monogramPlacement ?? "front",
+          monogramWrapMode: p.monogramWrapMode ?? "multiline",
           monogramFont: p.monogramFont ?? "serif",
-          monogramTexture: p.monogramTexture ?? "satin",
+          monogramTexture: p.monogramTexture ?? "linen",
           monogramColor: p.monogramColor ?? "auto",
           monogramSpacing: p.monogramSpacing ?? "standard",
           monogramSize: p.monogramSize ?? "md",
+          monogramScale: String(p.monogramScale ?? 1.0),
         },
       });
     });
@@ -200,9 +212,9 @@ export function DesignerPage() {
         </div>
 
         <SectionHead
-          eyebrow="Interactive Atelier"
-          title="Design your bespoke cushion set"
-          description="Craft custom pieces from our bolt library, configure dimensions and edge piping, and preview raised satin-stitch embroidery in real-time."
+          eyebrow="Interactive Workshop"
+          title="Design your product"
+          description="Craft custom pieces from our library"
           onDark
         />
 
@@ -305,8 +317,9 @@ export function DesignerPage() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {pillows.map((pillow, idx) => {
                   const isSelected = pillow.id === activePillow.id;
-                  const pillowFabric = findOption(FABRICS, pillow.fabricId);
+                  const pillowFabric = findOption(fabrics, pillow.fabricId);
                   return (
+
                     <div
                       key={pillow.id ?? idx}
                       style={{
@@ -344,7 +357,7 @@ export function DesignerPage() {
                         }}
                       >
                         {pillow.name ?? `Pillow ${idx + 1}`}
-                        {pillow.monogram?.trim() ? ` · ${pillow.monogram.trim().slice(0, 3)}` : ""}
+                        {pillow.monogram?.trim() ? ` · ${pillow.monogram.trim().length > 12 ? pillow.monogram.trim().slice(0, 12) + "…" : pillow.monogram.trim()}` : ""}
                       </span>
 
                       {pillows.length > 1 && (
@@ -486,5 +499,3 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
     </button>
   );
 }
-
-

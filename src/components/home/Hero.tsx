@@ -32,7 +32,7 @@ export function Hero() {
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.gold }} />
-          Handcrafted Bespoke Atelier
+          Handcrafted
         </div>
 
         <h1
@@ -60,7 +60,7 @@ export function Hero() {
             marginRight: "auto",
           }}
         >
-          Configure Belgian linens, plush velvets, contrast piping, and raised 3D thread embroidery in our real-time studio. Each piece is cut and stitched after you order.
+          Configure linens, plush velvets and raised 3D thread embroidery in our real-time studio. Each piece is cut and stitched after you order.
         </p>
 
         <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
@@ -105,7 +105,7 @@ export function Hero() {
           }}
         >
           <span>&bull; Real-time 3D Preview</span>
-          <span>&bull; Raised Satin Embroidery</span>
+          <span>&bull; Raised Linen Embroidery</span>
           <span>&bull; Feather-Down Inserts</span>
           <span>&bull; Small Batch Hand-Stitching</span>
         </div>
