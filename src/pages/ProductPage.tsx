@@ -170,7 +170,7 @@ export function ProductPage() {
             {product.shortDescription}
           </p>
 
-          <div style={{ margin: "24px 0 28px", paddingBottom: 20, borderBottom: `1px solid ${COLORS.line}` }}>
+          <div style={{ margin: "24px 0 28px", paddingBottom: 20, borderBottom: `1px solid` }}>
             <PriceSummary unitPrice={unitPrice} quantity={quantity} />
           </div>
 
@@ -289,4 +289,3 @@ function Accordion({ title, isOpen, onToggle, children }: { title: string; isOpe
     </div>
   );
 }
-
