@@ -38,9 +38,9 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
   const selectedSpacing = design.monogramSpacing ?? "standard";
   const selectedSize = design.monogramSize ?? "md";
   const selectedScale = design.monogramScale ?? (
-    selectedSize === "sm" ? 0.65 :
-    selectedSize === "lg" ? 1.35 :
-    selectedSize === "xl" ? 1.75 : 1.0
+    selectedSize === "sm" ? 1.75 :
+    selectedSize === "lg" ? 3.10 :
+    selectedSize === "xl" ? 4.00 : 2.35
   );
 
   const textures = (dbTextures && dbTextures.length > 0)
@@ -577,19 +577,19 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: COLORS.inkSoft }}>50%</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: COLORS.inkSoft }}>150%</span>
               <input
                 type="range"
-                min="0.5"
-                max="1.8"
+                min="1.5"
+                max="4.5"
                 step="0.05"
                 value={selectedScale}
                 onChange={(e) => {
                   const newScale = parseFloat(e.target.value);
                   let closestSize: MonogramSize = "md";
-                  if (newScale <= 0.8) closestSize = "sm";
-                  else if (newScale <= 1.15) closestSize = "md";
-                  else if (newScale <= 1.55) closestSize = "lg";
+                  if (newScale <= 2.05) closestSize = "sm";
+                  else if (newScale <= 2.72) closestSize = "md";
+                  else if (newScale <= 3.55) closestSize = "lg";
                   else closestSize = "xl";
                   onChange({
                     ...design,
@@ -604,7 +604,7 @@ export function MonogramPanel({ design, onChange }: MonogramPanelProps) {
                   cursor: "pointer",
                 }}
               />
-              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: COLORS.inkSoft }}>180%</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: COLORS.inkSoft }}>450%</span>
             </div>
           </div>
 

@@ -356,9 +356,9 @@ function PillowItem({
   const monogramSpacing = design.monogramSpacing ?? "standard";
   const monogramSize = design.monogramSize ?? "md";
   const monogramScaleMultiplier = design.monogramScale ?? (
-    monogramSize === "sm" ? 0.65 :
-    monogramSize === "lg" ? 1.35 :
-    monogramSize === "xl" ? 1.75 : 1.0
+    monogramSize === "sm" ? 1.75 :
+    monogramSize === "lg" ? 3.10 :
+    monogramSize === "xl" ? 4.00 : 2.35
   );
   const threadColor = (design.monogramColor && design.monogramColor !== "auto")
     ? design.monogramColor

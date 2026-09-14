@@ -143,7 +143,7 @@ export function DesignerPage() {
         monogramColor: activePillow.monogramColor ?? "auto",
         monogramSpacing: activePillow.monogramSpacing ?? "standard",
         monogramSize: activePillow.monogramSize ?? "md",
-        monogramScale: String(activePillow.monogramScale ?? 1.0),
+        monogramScale: String(activePillow.monogramScale ?? 2.35),
       },
     });
     setToastMessage(`Added ${activePillow.name ?? "custom pillow"} to your bag`);
@@ -193,7 +193,7 @@ export function DesignerPage() {
           monogramColor: p.monogramColor ?? "auto",
           monogramSpacing: p.monogramSpacing ?? "standard",
           monogramSize: p.monogramSize ?? "md",
-          monogramScale: String(p.monogramScale ?? 1.0),
+          monogramScale: String(p.monogramScale ?? 2.35),
         },
       });
     });

@@ -9,15 +9,17 @@ import type { Product, ProductCategory } from "../types/product";
 const CATEGORY_LABELS: Record<ProductCategory, string> = {
   pillow: "Pillows & Cushions",
   accessory: "Inserts & Add-Ons",
+  pajamas: "Pajamas & Loungewear",
 };
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   all: "Every piece cut and finished to order by African Artisans.",
   pillow: "Square cushion covers tailored to your desired size and trim.",
   accessory: "95/5 feather-down inserts, custom monogramming, and studio accessories.",
+  pajamas: "Soft, breathable, and elegant loungewear for your comfort.",
 };
 
-const CATEGORIES: ProductCategory[] = ["pillow", "accessory"];
+const CATEGORIES: ProductCategory[] = ["pillow", "accessory", "pajamas"];
 
 export function ShopPage() {
   const { category } = useParams<{ category?: string }>();

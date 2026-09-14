@@ -54,6 +54,7 @@ export function Footer() {
               { to: "/designer", label: "3D Design Studio" },
               { to: "/shop/pillow", label: "Pillow Catalog" },
               { to: "/shop/accessory", label: "Inserts & Accessories" },
+              { to: "/shop/pajamas", label: "Loungewear & Pajamas" },
             ]}
           />
 

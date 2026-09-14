@@ -46,7 +46,7 @@ export const DEFAULT_PILLOW_DESIGN: PillowDesignState = {
   monogramColor: "auto",
   monogramSpacing: "standard",
   monogramSize: "md",
-  monogramScale: 1.0,
+  monogramScale: 2.35,
   quantity: 1,
 };
 
@@ -65,7 +65,7 @@ export function createNewPillowDesign(index: number, fabricId: string = "linen-o
     monogramColor: "auto",
     monogramSpacing: "standard",
     monogramSize: "md",
-    monogramScale: 1.0,
+    monogramScale: 2.35,
     quantity: 1,
   };
 }

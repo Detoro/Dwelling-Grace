@@ -1,4 +1,4 @@
-export type ProductCategory = "pillow" | "accessory";
+export type ProductCategory = "pillow" | "accessory" | "pajamas";
 
 export interface ProductVariantOption {
   id: string;

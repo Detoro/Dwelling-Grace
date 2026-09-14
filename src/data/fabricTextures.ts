@@ -28,7 +28,6 @@ export const FABRIC_WEAVES: Record<string, FabricWeave> = {
   rough_linen: polyhavenWeave("rough_linen", "Rough linen", 4),
   linen: polyhavenWeave("rough_linen", "Rough linen", 4),
   velour_velvet: polyhavenWeave("velour_velvet", "Velour velvet", 3),
-  velvet: polyhavenWeave("velour_velvet", "Velour velvet", 3),
   silk: polyhavenWeave("crepe_satin", "Silk/satin crepe", 3),
   floral: polyhavenWeave("floral_jacquard", "Floral jacquard", 3),
 };
