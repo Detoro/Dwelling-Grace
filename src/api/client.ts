@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:5000/api").replace(/\/+$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "https://dwelling-grace.onrender.com/api").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
